@@ -1,0 +1,10 @@
+// 1. Importar las funciones de Bootstrap
+@import "../node_modules/bootstrap/scss/functions";
+
+// 2. Importar las variables de Bootstrap
+@import "../node_modules/bootstrap/scss/variables";
+
+// 3. Sobrescribir la variable `$primary` con el nuevo color
+
+// 4. Importar el resto de Bootstrap para aplicar los cambios
+@import "../node_modules/bootstrap/scss/bootstrap";

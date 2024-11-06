@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOT TO GO!</title>
+    
+    <script async src="https://unpkg.com/es-modeule-shims@1.6.3/dist/es-modeule-shims.js"></script>
+    <script type="importmap">
+        {
+            "imports":{
+                "three": "https://unpkg.com/three@v0.155.0/build/three.module.js",
+                "three/addons/":"https://unpkg.com/three@0.155.0/examples/jsm/"
+            }
+        }
+    </script>
+    
+    <link href="https://fonts.cdnfonts.com/css/gill-sans-nova-cond-ultra-bold" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="./scss/styles.css">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div class="top">
+        <h1>Hot To Go!</h1>
+        <!-- <button class="btn btn-primary settings-btn d-flex align-items-center justify-content-center"><i class="bi bi-gear-fill"></i></button> -->
+    </div>
+    <div class="canvas" id="threejs-container" style="display: none;">
+       <div class="HUD">
+        <div class="ordenes">
+            <div class="orden">
+                <div class="orden-content">
+                    <img src="./imagenes/image 1.png" alt="">
+                    <h3>Pizza</h3>
+                </div>
+                <div class="orden-timeleft">
+
+                </div>
+            </div>
+            <div class="orden">
+                <div class="orden-content">
+                    <img src="./imagenes/image 1.png" alt="">
+                    <h3>Pizza</h3>
+                </div>
+                <div class="orden-timeleft">
+                    
+                </div>
+            </div>
+        </div>
+        <h4 id="score">Score: 0000</h4>
+        <h4 id="time">Time: 3:00</h4>
+       </div>
+    </div>
+    <!-- Menu principal -->
+    <div class="canvas" id="game-ui">
+        <div class="fondo">
+            <h1 class="title">Hot To Go!</h1>
+           
+            <button  id="play-btn" class="btn btn-primary play-btn d-flex align-items-center justify-content-center">Play!</button>
+            <div style="display: flex; justify-content: space-between; width: 17rem;">
+                <button  id="settings" class="btn btn-primary settings-btn d-flex align-items-center justify-content-center"><i style="font-size: 3rem;" class="bi bi-gear-fill"></i></button>
+                <button  id="highscore-btn" class="btn btn-primary settings-btn d-flex align-items-center justify-content-center"><i style="font-size: 3rem;" class="bi bi-building-fill-up"></i></button>
+            </div>
+        </div>
+    </div>
+    <!-- multiplayer or singleplayer -->
+    <div class="canvas" id="player-mode" style="display: none;"  >
+        <div class="player-mode">
+            <h1>Player Mode</h1>
+            <button id="singleplayer-btn" class="btn btn-primary play-btn d-flex align-items-center justify-content-center">Single Player</button>
+            <button id="multiplayer-btn"class="btn btn-primary play-btn d-flex align-items-center justify-content-center">Multi Player</button>
+            <button id="go-back-player" class="btn btn-primary play-btn d-flex align-items-center justify-content-center">Go Back</button>
+        </div>
+    </div>
+    <!-- seleccionar mapa -->
+    <div class="canvas" id="map-selector"style="display: none;"  >
+        <div class="level-mode">
+            <h1>Choose level</h1>
+            <div class="scenes">
+                <button id="select-city" class="btn btn-primary btn-city">Ciudad</button>
+                <button id="select-beach" class="btn btn-primary btn-beach">Playa</button>
+                <button id="select-minecraft" class="btn btn-primary btn-minecraft">Minecraft</button>
+            </div>
+            <input id="go-back-map" type="button" value="Go back" class="btn  btn-primary play-btn "/>
+        </div>
+    </div>
+    <!-- dificultad -->
+    <div class="canvas" id="difficulty-mode" style="display: none;"  >
+        <div class="player-mode">
+            <h1>Difficulty</h1>
+            <button id="normal-btn" class="btn btn-primary play-btn d-flex align-items-center justify-content-center">Normal</button>
+            <button id="hard-btn"class="btn btn-primary play-btn d-flex align-items-center justify-content-center">Hard</button>
+            <button id="go-back-difficulty" class="btn btn-primary play-btn d-flex align-items-center justify-content-center">Go Back</button>
+        </div>
+    </div>
+    <!-- seleccionar usuario -->
+    <div class="canvas" id="username-input" style="display: none;"  >
+        <div class="player-mode">
+            <h1>Your username</h1>
+            <input id="idNombreJugador" autocomplete="off" class="form-control" />
+            <input id="join-btn" type="button" value="Join" class="btn  btn-primary play-btn "/>
+            <input id="go-back-username" type="button" value="Go back" class="btn  btn-primary play-btn "/>
+        </div>
+    </div>
+    <!-- Game over -->
+    <div id="game-over" class="canvas" style="display: none;">
+        <div class="fondo">
+            
+            <h1 class="gameOver_title">Game over</h1>
+            <div class="gameover">
+                <div class="gameover_div">
+                    <button class="btn btn-primary play-btn d-flex align-items-center justify-content-center">Play again?</button>
+                    <button class="btn btn-primary play-btn d-flex align-items-center justify-content-center">End</button>
+                </div>
+                <div class="highscores">
+                    <h3>Highscores</h3>
+                    <ol type="1">
+                        <li>Player 1</li>
+                        <li>Player 2</li>
+                        <li>Player 3</li>
+                        <li>Player 4</li>
+                        <li>Player 5</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Configuraciones -->
+    <div id="config-screen" class="canvas" style="display: none;" >
+        <div class="config_bg" >
+            
+            <div class="config_text">
+                <h1 class="config_title">Hot To Go!</h1>
+                <h1>Settings</h1>
+                <div class="option_menu">
+                    <div class="option">
+                        <div class="custom-checkbox">
+                            <input type="checkbox" id="custom-checbox">
+                            <label for="custom-checbox"></label>
+                        </div>
+                        <h3>Option 1</h3>
+                    </div><div class="option">
+                        <div class="custom-checkbox">
+                            <input type="checkbox" id="custom-checbox1">
+                            <label for="custom-checbox1"></label>
+                        </div>
+                        <h3>Option 2</h3>
+                    </div><div class="option">
+                        <div class="custom-checkbox">
+                            <input type="checkbox" id="custom-checbox2">
+                            <label for="custom-checbox2"></label>
+                        </div>
+                        <h3>Option 3</h3>
+                    </div>
+                </div>
+
+            </div>
+            <img class="config_img" src="./imagenes/personaje_cute.png" alt="">
+        </div>
+    </div>
+    <!-- Pause -->
+    <div class="canvas"  id="pause-menu"  style="display: none;">
+        <div class="fondo">
+            <h1 class="title">Pause</h1>
+            <button id="resume-btn" class="btn btn-primary play-btn d-flex align-items-center justify-content-center">Continue?</button>
+            <div class="end_div">
+                <button id="end-btn" class="btn btn-primary play-btn d-flex align-items-center justify-content-center">End</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>   
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script> 
+    <script type="module" src="./main.js">
+    </script>
+</body>
+</html>

@@ -1,0 +1,364 @@
+body{
+    font-family: 'Gill Sans Nova Cond Ultra Bold', sans-serif;
+    width: 100vw;
+    height: 100vh;
+    background: repeating-linear-gradient(transparent, transparent 8.25px, #a80000 8.25px, #a80000 12.375px, transparent 12.375px, transparent 16.5px, #a80000 12.375px, #a80000 33px, transparent 33px, transparent 37.125px, #a80000 37.125px, #a80000 41.25px, transparent 41.25px, transparent 66px), repeating-linear-gradient(90deg, transparent, transparent 8.25px, #a80000 8.25px, #a80000 12.375px, transparent 12.375px, transparent 16.5px, #a80000 12.375px, #a80000 33px, transparent 33px, transparent 37.125px, #a80000 37.125px, #a80000 41.25px, transparent 41.25px, transparent 66px), #ca9c37;
+    background-blend-mode: multiply;
+    background-color: #ca9c37;
+}
+h1{
+    color: #fff600;
+    font-weight: 800;
+    font-size: 8vh;
+    text-shadow: #000000 .5vh -1vh;
+}
+.top{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+.canvas{
+    height: 85%;
+    width: 95%;
+    background-color: #000000;
+    margin: auto;
+    display: flex;
+}
+.fondo{
+    width: 100%;
+    height: 100%;
+    background-image: url('./imagenes/fondo.png');
+    background-position: center; /* Center the image */
+    background-repeat: no-repeat; /* Do not repeat the image */
+    background-size: cover; /* Resize the background image to cover the entire container */
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+}
+.settings-btn{
+    background-color: #fff600;
+    height: 5rem;
+    width: 5rem;
+    border-radius: 50%;
+    color: #a80000;
+    margin: 5px;
+}
+.settings-btn:hover{
+    background-color: #ffe600;
+    color: #ff0000;
+}
+.play-btn{
+    background-color: #fff600;
+    width: fit-content;
+    padding-left: 40px;
+    padding-right: 40px;
+    height: 15%;
+    font-size: 8vh;
+    color: #ff0000;
+    border: 1vh solid ;
+}
+.play-btn:hover{
+    background-color: #ffe600;
+    color: #a80000;
+    border: 1.5vh solid ;
+}
+.bi{
+    font-size: 2rem;
+}
+.title{
+    color: #fff600;
+    font-weight: 800;
+    font-size: 25vh;
+    text-shadow: #000000 2vh -3vh;
+
+}
+.config_bg{
+    height: 100%;
+    margin: auto;
+    display: flex;
+    flex-direction: row;
+    background-color: #a80000;
+    padding: 4%;
+    justify-content: space-around;
+}
+.config_text{
+    display: flex;
+    flex-direction: column;
+}
+.config_title{
+    font-size: 15vh;
+}
+.config_img{
+    height: 100%;
+    width:fit-content;
+}
+.option{
+    display: flex;
+    color: #fff600;
+}
+.option > h3{
+    font-size: 8vh;
+    text-shadow: #000000 .7vh -1vh;
+}
+.custom-checkbox {
+    position: relative;
+    display: inline-block;
+    margin: 10px;
+}
+  
+  .custom-checkbox input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+  
+  .custom-checkbox label {
+    position: relative;
+    cursor: pointer;
+    width: 8vh;
+    height: 8vh;
+    background-color: #fff600;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  
+  /* Estilo cuando está seleccionado */
+  .custom-checkbox input[type="checkbox"]:checked + label {
+    background-color: #ffe600;
+  }
+  
+  /* Añadir una marca de verificación */
+  .custom-checkbox label:after {
+    content: "";
+    position: absolute;
+    display: none;
+  }
+  
+  .custom-checkbox input[type="checkbox"]:checked + label:after {
+    display: block;
+    left: 2vh;
+    top: 2vh;
+    width: 4vh;
+    height: 4vh;
+    border: solid #ff0000;
+    border-width: 0 2vh .8vh 0;
+    transform: rotate(45deg);
+  }
+  .custom-checkbox label:hover {
+    background-color: #ffe600;
+  }
+  .end_div{
+    display: flex;
+    align-items: end;
+    justify-content: right;
+    width: 100%;
+    height: 20vh;
+    padding-right: 5vh;
+  }
+  .end_div > button{
+    height: 50%;
+  }
+  .gameover_div{
+    display: flex;
+    flex-direction: column;
+    justify-content:space-evenly;
+    width: 25%;
+    height: 60vh;
+  }
+  .gameover{
+    width: 100%;
+    display: flex;
+    align-items:flex-start;
+    justify-content: space-around;
+  }
+  .gameover_div > button{
+    width: 100%;
+    height: fit-content;
+    font-size: 6vh;
+  }
+  .gameOver_title{
+    font-size: 15vh;
+  }
+  .highscores{
+    width: 50%;
+    height: 80%;
+    background-color: #ff0000;
+    color: #fff600;
+    border: 2vh solid;
+    border-radius: 1vh;
+    padding: 1%;
+    font-size: 4vh;
+  }
+  .highscores >h3 {
+    font-size: 8vh;
+  }
+
+  #tiempo{
+    transform: translateX(100px)
+  }
+
+.player-mode{
+  display:flex;
+  flex-direction: column;
+  justify-content: left;
+  height: 100%;
+  width: 100%;
+  padding: 10%;
+  background-image: url('./imagenes/fondo.png');
+  .btn{
+    font-size: 3rem;
+    width: fit-content;
+    height: fit-content;
+    margin-top: 3rem;
+  }
+  .form-control{
+    font-size: 3rem;
+    border-width: 1rem;
+    border-color: #ffe600;
+  }
+}
+
+.level-mode{
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  width: 100%;
+  padding: 10%;
+  background-image: url('./imagenes/fondo.png');
+  .btn{
+    font-size: 3rem;
+    width: fit-content;
+    height: fit-content;
+    margin-top: 3rem;
+    margin: 1rem;
+  }
+  .scenes{
+    display: flex;
+    justify-content: center;
+  }
+  .btn:hover{
+    border-width: 1rem;
+  }
+  .btn-city{
+    width: 20rem;
+    height: 20rem;
+    
+    color: white;
+    background-image: url('./imagenes/ciudad.jpg');
+    background-size: cover;
+    transition: background 0.2s;
+    &:hover{
+     background-image: url('./imagenes/ciudad2.jpg');
+    }
+    &:active{
+      color: #ffe600;
+    }
+  }
+  .btn-beach{
+    width: 20rem;
+    height: 20rem;
+    
+    color: white;
+    background-image: url('./imagenes/playa.jpg');
+    background-size: cover;
+    transition: background 0.2s;
+    &:hover{
+     background-image: url('./imagenes/playa2.jpg');
+    }
+    
+    &:active{
+      color: #ffe600;
+    }
+  }
+  .btn-minecraft{
+    width: 20rem;
+    height: 20rem;
+    
+    color: white;
+    background-image: url('./imagenes/minecraft.jpg');
+    background-size: cover;
+    transition: background 0.2s;
+    &:hover{
+     background-image: url('./imagenes/minecraft2.jpg');
+    }
+    
+    &:active{
+      color: #ffe600;
+    }
+  }
+}
+
+/* Asegura que el contenedor ocupe todo el espacio disponible */
+#threejs-container {
+  position: relative;
+  overflow: visible;
+  .HUD{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+
+    .ordenes{
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+    }
+    .orden{
+      margin: 0.3rem;
+    }
+    .orden-content{
+      background-color: #ffe600;
+      border: solid #ff0000 0.5rem;
+      border-radius: 10px;
+      padding: .5rem;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      h3{
+        font-size: 3.5rem;
+      }
+      img{
+        width: 8rem;
+      }
+    }
+    .orden-timeleft{
+      width: 100%;
+      background-color: #00FF00;
+      height: 1rem;
+      margin: 5px;
+      margin-right: auto;
+    }
+    #time{
+      position: absolute;
+      bottom: .5rem;
+      right: 1rem;
+      font-size: 4rem;
+      color: #a80000;
+      text-shadow: #000000 .5vh .5vh;
+    }
+    #score{
+      position: absolute;
+      bottom: .5rem;
+      left: 1rem;
+      font-size: 4rem;
+      color: #a80000;
+      text-shadow: #000000 .5vh .5vh;
+    }
+  }
+}
+
+/* Estilo básico para los textos del HUD */
+.hud-label {
+  white-space: nowrap;
+  text-align: center;
+  font-weight: bold;
+}

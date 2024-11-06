@@ -1,0 +1,172 @@
+# Blender 4.2.3 LTS MTL File: 'escenario.blend'
+# www.blender.org
+
+newmtl BeachBallBlue
+Ns 96.078453
+Ka 1.000000 1.000000 1.000000
+Kd 0.008798 0.104138 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+
+newmtl BeachBallRed
+Ns 96.078453
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.006227 0.007536
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+
+newmtl BeachBallWhite
+Ns 96.078453
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.620861 0.620861
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+
+newmtl BeachBallYellow
+Ns 96.078453
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.600587 0.005900
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+
+newmtl Material.001
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd DefaultMaterial_Base_color.png
+map_Ns DefaultMaterial_Roughness.png
+
+newmtl Material.002
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd DefaultMaterial_Base_color.png
+map_Ns DefaultMaterial_Roughness.png
+
+newmtl Material.003
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd DefaultMaterial_Base_color.png
+map_Ns DefaultMaterial_Roughness.png
+
+newmtl Material.004
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd DefaultMaterial_Base_color.png
+map_Ns DefaultMaterial_Roughness.png
+
+newmtl Material.005
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd DefaultMaterial_Base_color.png
+map_Ns DefaultMaterial_Roughness.png
+
+newmtl PlainTexture
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd Chaise longe.png
+
+newmtl PlainTexture.001
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd Chaise longe.png
+
+newmtl Sand
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd aerial_beach_01_diff_4k.jpg
+
+newmtl palmtreeleaf
+Ns 360.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 2
+map_Kd stylized_palmtreeleaf.png
+map_d stylized_palmtreeleaf.png
+
+newmtl palmtreeleaf.001
+Ns 360.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 2
+map_Kd stylized_palmtreeleaf.png
+map_d stylized_palmtreeleaf.png
+
+newmtl palmtreeleaf.002
+Ns 360.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 2
+map_Kd stylized_palmtreeleaf.png
+map_d stylized_palmtreeleaf.png
+
+newmtl palmtreeleaf.003
+Ns 360.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 2
+map_Kd stylized_palmtreeleaf.png
+map_d stylized_palmtreeleaf.png
+
+newmtl palmtreeleaf.004
+Ns 360.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 2
+map_Kd stylized_palmtreeleaf.png
+map_d stylized_palmtreeleaf.png
