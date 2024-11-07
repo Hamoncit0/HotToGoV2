@@ -4,7 +4,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 //clases
 import Player from './src/clases/Player.js'
 import {ScreenController} from './src/clases/ScreenController.js';
-import AudioManager from './src/clases/AudioManager.js';
+import Item from './src/clases/Item.js';
 
 // Configuración básica
 const container = document.getElementById('threejs-container');
@@ -24,9 +24,9 @@ container.appendChild(renderer.domElement);
 
 let clock = new THREE.Clock(); // Reloj para medir el tiempo
 
-const localPlayer = new Player(scene, camera, './src/models/players/player_1v4.gltf', { x: 0, y: 2, z: -2 });
+const localPlayer = new Player(scene, './src/models/players/player_1v4.gltf', { x: 0, y: 2, z: -2 });
 
-//const controls = new OrbitControls(camera, renderer.domElement);
+const controls = new OrbitControls(camera, renderer.domElement);
 
 
 //Controlador de pantallas
@@ -50,6 +50,7 @@ document.addEventListener('keyup', (event) => {
 });
 let colisionado = false;
 let collisionCooldown = 10000
+const apple = new Item(scene, './src/models/comida/Pizza', { x: -2, y: 2.5, z: -2 });
 function animate(isGameRunning, isGamePaused) {
     if (!isGameRunning || isGamePaused) return;
 
@@ -65,19 +66,14 @@ function animate(isGameRunning, isGamePaused) {
 
      scene.children.forEach((object) => {
       if (object.collisionBox && checkCollision(localPlayer, object)) {
-          console.log('COLISION')
-          if (keyboard['m'] || keyboard['M']) {
-            if(colisionado == false){
-              alert('COLISIONASTE TILIN');
-              colisionado = true
-            }
-          } 
-          // Reactiva la detección de colisiones después del tiempo de espera
-          setTimeout(() => {
-           colisionado = false;
-         }, collisionCooldown);
+          localPlayer.revertPosition()
       }
     });
+
+    if (apple.isNear(localPlayer)) {
+      console.log('huh')
+      localPlayer.pickUpObject(apple);
+    }
 
     renderer.render(scene, camera);
 }

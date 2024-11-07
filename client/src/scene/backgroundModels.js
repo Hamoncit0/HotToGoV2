@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { loadModel } from '../clases/modelLoader.js'
+import Item from '../clases/Item.js';
 
 export function city(scene) {
     loadModel('./src/models/muebles_separados/arriba', 'arriba', scene, { x: 0, y: Math.PI/2, z: 0 }, { x: 0, y: 0, z: 0 }, true)
@@ -9,6 +10,8 @@ export function city(scene) {
     loadModel('./src/models/muebles_separados/en_medio', 'en_medio', scene, { x: 0, y: Math.PI/2, z: 0 }, { x: 0, y: 0, z: 0 }, true)
 
     loadModel('./src/models/pizzeria/pizzeria', 'pizzeria', scene, { x: 0, y: Math.PI/2, z: 0 });
+    //loadModel('./src/models/comida/Pizza', 'pizza', scene, { x: 0, y: 0, z: 0 }, { x: 0, y:2, z: 0 });
+   
 }
 
 export function beach(scene) {
