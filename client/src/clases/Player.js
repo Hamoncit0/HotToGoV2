@@ -54,6 +54,16 @@ export default class Player {
       //object.hide();
     }
   }
+  
+  dropObject() {
+    if (this.heldObject) {
+      this.heldObject.mesh.position.copy(this.mesh.position); // Coloca el objeto en la posición del jugador
+      this.heldObject.mesh.position.y = 2.5;
+      this.heldObject.updateCollisionBox()
+      this.heldObject = null;
+    }
+  }
+
 
   // Método para actualizar la posición del objeto sostenido
   holdObjectInFront() {

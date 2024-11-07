@@ -70,10 +70,17 @@ function animate(isGameRunning, isGamePaused) {
       }
     });
 
-    if (apple.isNear(localPlayer)) {
-      console.log('huh')
-      localPlayer.pickUpObject(apple);
-    }
+    // if (apple.isNear(localPlayer)) {
+    //   console.log('huh')
+    //   localPlayer.pickUpObject(apple);
+    // }
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'e') { // Presiona 'e' para recoger el objeto
+        localPlayer.pickUpObject(apple);
+      } else if (event.key === 'q') { // Presiona 'q' para soltar el objeto
+        localPlayer.dropObject();
+      }
+    });
 
     renderer.render(scene, camera);
 }

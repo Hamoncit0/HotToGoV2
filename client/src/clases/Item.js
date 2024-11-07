@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
+
 const manager = new THREE.LoadingManager();
 manager.onStart = function (url, itemsLoaded, itemsTotal){
     console.log('Started loading file:' + url + '\nLoaded' + itemsLoaded + ' of ' + itemsTotal + 'files.')
@@ -14,6 +15,7 @@ manager.onProgress = function (url, itemsLoaded, itemsTotal){
 manager.onError = function (url){
     console.log('There was an error loading ' + url)
 }
+
 export default class Item {
   constructor(scene, modelPath, position) {
     this.scene = scene;
@@ -52,6 +54,12 @@ export default class Item {
   hide() {
     if (this.mesh) {
       this.mesh.visible = false;
+    }
+  }
+  
+  updateCollisionBox() {
+    if (this.mesh) {
+      this.collisionBox.setFromObject(this.mesh);
     }
   }
 }
