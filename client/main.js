@@ -5,7 +5,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Player from './src/clases/Player.js'
 import {ScreenController} from './src/clases/ScreenController.js';
 import GameController from './src/clases/GameController.js';
-
+import Rat from './src/clases/Rat.js'
 //import Item from './src/clases/Item.js';
 import Dispenser from './src/clases/Dispenser.js';
 
@@ -64,7 +64,7 @@ let collisionCooldown = 10000
 
 const dispenser = new Dispenser(scene, {x: -4, y: 2, z: -6}, camera, 'Pizza');
 const dispenserLasagna = new Dispenser(scene, {x: -2, y: 2, z: -6}, camera, 'Risoto');
-
+const rat = new Rat(scene, {x: -2, y: 2, z: -3})
 
 function animate(isGameRunning, isGamePaused) {
 
@@ -100,6 +100,7 @@ function animate(isGameRunning, isGamePaused) {
 
     gameController.update();
     dispenserLasagna.update();
+    rat.update(deltaTime);
     renderer.render(scene, camera);
 }
 
