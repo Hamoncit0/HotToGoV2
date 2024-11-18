@@ -4,7 +4,7 @@ import Item from '../clases/Item.js';
 
 export function city(scene) {
     loadModel('./src/models/muebles_separados/arriba', 'arriba', scene, { x: 0, y: Math.PI/2, z: 0 }, { x: 0, y: 0, z: 0 }, true)
-    loadModel('./src/models/muebles_separados/centro', 'centro', scene, { x: 0, y: Math.PI/2, z: 0 }, { x: 0, y: 0, z: 0 }, true)
+    //loadModel('./src/models/muebles_separados/centro', 'centro', scene, { x: 0, y: Math.PI/2, z: 0 }, { x: 0, y: 0, z: 0 }, true)
     loadModel('./src/models/muebles_separados/derecha', 'derecha', scene, { x: 0, y: Math.PI/2, z: 0 }, { x: 0, y: 0, z: 0 }, true)
     loadModel('./src/models/muebles_separados/izquierda', 'izquierda', scene, { x: 0, y: Math.PI/2, z: 0 }, { x: 0, y: 0, z: 0 }, true)
     loadModel('./src/models/muebles_separados/en_medio', 'en_medio', scene, { x: 0, y: Math.PI/2, z: 0 }, { x: 0, y: 0, z: 0 }, true)

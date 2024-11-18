@@ -33,7 +33,8 @@ const localPlayer = new Player(scene, './src/models/players/player_1v4.gltf', { 
 const gameController = new GameController(scene, localPlayer);
 
 const screenController = new ScreenController(container, renderer, clock, animate, scene, camera, gameController);
-gameController.loadDeliveryZone('./src/models/delivertable/table.obj', './src/models/delivertable/table.mtl', { x: 5, y: 2, z: -5 });
+gameController.loadDeliveryZone('./src/models/delivertable/table.obj', './src/models/delivertable/table.mtl', { x: -4, y: 1.5, z: -.8 });
+gameController.loadDeliveryZone('./src/models/delivertable/table.obj', './src/models/delivertable/table.mtl', { x: 3, y: 1.5, z: -.8 });
 
 //sirve para generar ordenes cada cierto tiempo 1000 = 1sec
 setInterval(() => {
@@ -59,7 +60,12 @@ document.addEventListener('keyup', (event) => {
 });
 let colisionado = false;
 let collisionCooldown = 10000
-const dispenser = new Dispenser(scene, {x: -2, y: 2.5, z: -2});
+
+
+const dispenser = new Dispenser(scene, {x: -4, y: 2, z: -6}, camera, 'Pizza');
+const dispenserLasagna = new Dispenser(scene, {x: -2, y: 2, z: -6}, camera, 'Risoto');
+
+
 function animate(isGameRunning, isGamePaused) {
 
 
@@ -82,10 +88,10 @@ function animate(isGameRunning, isGamePaused) {
     });
 
 	window.addEventListener('keyup', (event) => {
-		if (event.key === 'f' && dispenser.canDispense && dispenser.isNear(localPlayer)) { // Presiona "f" para generar una pizza
-		  dispenser.dispenseAgua();
+		if (event.key === 'f' && dispenserLasagna.canDispense && dispenserLasagna.isNear(localPlayer)) { // Presiona "f" para generar una pizza
+		  dispenserLasagna.dispenseItem();
 		} else if (event.key === 'e' && !localPlayer.heldObject) { // Presiona "e" para recoger la pizza más cercana
-		  dispenser.items.forEach(pizza => localPlayer.pickUpObject(pizza));
+		  dispenserLasagna.items.forEach(pizza => localPlayer.pickUpObject(pizza));
 		}
     else if(event.key === 'e' && localPlayer.heldObject){
       localPlayer.dropObject();
@@ -93,6 +99,7 @@ function animate(isGameRunning, isGamePaused) {
 	  });
 
     gameController.update();
+    dispenserLasagna.update();
     renderer.render(scene, camera);
 }
 

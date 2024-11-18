@@ -100,7 +100,7 @@ export default class GameController {
             return;
         }
         
-        const items = ['Pizza', 'Agua', 'Risoto'];
+        const items = ['Pizza', 'Agua', 'Risoto', 'Lasagna'];
         const randomItem = items[Math.floor(Math.random() * items.length)];
 
         const newOrder = {
