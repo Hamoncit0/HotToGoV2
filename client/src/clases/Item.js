@@ -51,8 +51,13 @@ export default class Item {
 
   // Método para detectar si el jugador está cerca
   isNear(collisionBox) {
+    if (!this.collisionBox) {
+        // Si la caja de colisión es nula, el objeto ya no está activo
+        return false;
+    }
     return this.collisionBox.intersectsBox(collisionBox);
-  }
+}
+
 
   // Método para esconder el objeto (por ejemplo, cuando es recogido)
   hide() {
@@ -64,6 +69,29 @@ export default class Item {
   updateCollisionBox() {
     if (this.mesh) {
       this.collisionBox.setFromObject(this.mesh);
+    }
+  }
+   // Método para destruir el objeto
+  destroy() {
+    if (this.mesh) {
+        // Eliminar el objeto de la escena
+        this.scene.remove(this.mesh);
+
+        // Recorrer y liberar geometría y materiales
+        this.mesh.traverse((child) => {
+            if (child.isMesh) {
+                child.geometry.dispose();
+                if (Array.isArray(child.material)) {
+                    child.material.forEach((material) => material.dispose());
+                } else {
+                    child.material.dispose();
+                }
+            }
+        });
+
+        // Eliminar referencias
+        this.mesh = null;
+        this.collisionBox = null;
     }
   }
 }

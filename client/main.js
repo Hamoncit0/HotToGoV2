@@ -4,6 +4,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 //clases
 import Player from './src/clases/Player.js'
 import {ScreenController} from './src/clases/ScreenController.js';
+import GameController from './src/clases/GameController.js';
+
 //import Item from './src/clases/Item.js';
 import Dispenser from './src/clases/Dispenser.js';
 
@@ -28,8 +30,17 @@ let clock = new THREE.Clock(); // Reloj para medir el tiempo
 const localPlayer = new Player(scene, './src/models/players/player_1v4.gltf', { x: 0, y: 2, z: -2 });
 
 //Controlador de pantallas
-const screenController = new ScreenController(container, renderer, clock, animate, scene, camera);
+const gameController = new GameController(scene, localPlayer);
 
+const screenController = new ScreenController(container, renderer, clock, animate, scene, camera, gameController);
+gameController.loadDeliveryZone('./src/models/delivertable/table.obj', './src/models/delivertable/table.mtl', { x: 5, y: 2, z: -5 });
+
+//sirve para generar ordenes cada cierto tiempo 1000 = 1sec
+setInterval(() => {
+  if (gameController.isPlaying) {
+      gameController.generateOrder();
+  }
+}, 10000);
 // Ajuste de ventana
 window.addEventListener('resize', () => {
     const width = container.clientWidth;
@@ -38,7 +49,7 @@ window.addEventListener('resize', () => {
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
 });
-const speed = 0.6;
+const speed = 0.3;
 const keyboard = {};
 document.addEventListener('keydown', (event) => {
   keyboard[event.key] = true;
@@ -50,6 +61,8 @@ let colisionado = false;
 let collisionCooldown = 10000
 const dispenser = new Dispenser(scene, {x: -2, y: 2.5, z: -2});
 function animate(isGameRunning, isGamePaused) {
+
+
     if (!isGameRunning || isGamePaused) return;
 
     requestAnimationFrame(animate);
@@ -79,6 +92,7 @@ function animate(isGameRunning, isGamePaused) {
     }
 	  });
 
+    gameController.update();
     renderer.render(scene, camera);
 }
 

@@ -2,11 +2,11 @@
 import { city, beach, minecraft } from "../scene/backgroundModels.js";
 import { setupLighting, setUpLightingBeach, setUpLightingMinecraft } from '../scene/lighting.js';
 import AudioManager from './AudioManager.js';
-
+import GameController from "./GameController.js";
 
 import * as THREE from 'three';
 export class ScreenController {
-    constructor(container, renderer, clock, animate, scene, camera) {
+    constructor(container, renderer, clock, animate, scene, camera, gameController) {
         this.container = container;
         this.renderer = renderer;
         this.clock = clock;
@@ -20,7 +20,7 @@ export class ScreenController {
         this.playerModeSelected = 0; // 0: single player, 1: multiplayer
         this.mapSelected = 0; // 0: city, 1: beach
         this.difficulty = 0; // 0: normal, 1: hard
-
+        this.gameController = gameController;
         // PANTALLAS
         this.Screens = {
             MAIN: document.getElementById('game-ui'),
@@ -126,6 +126,7 @@ export class ScreenController {
 
     startGame() {
         this.isGameRunning = true;
+        this.gameController.isPlaying = true;
         this.goToScreen(this.Screens.GAME);
         this.renderer.setSize(this.Screens.GAME.clientWidth, this.Screens.GAME.clientHeight);
 

@@ -99,4 +99,9 @@ export default class Dispenser {
       }
     }
 
+    update(){
+      this.items = this.items.filter(item => item.collisionBox !== null);
+
+    }
+
   }
