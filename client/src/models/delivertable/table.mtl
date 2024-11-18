@@ -1,0 +1,24 @@
+# Blender 4.2.3 LTS MTL File: 'None'
+# www.blender.org
+
+newmtl BLACK_METAL
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Metal028_2K-PNG_Color_png.png
+map_Bump -bm 0.700000 Metal028_2K-PNG_NormalGL.png
+
+newmtl WOOD
+Ns 159.999985
+Ka 0.640909 0.640909 0.640909
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+map_Kd Wood067_2K-PNG_Color.png
+map_Bump -bm 0.600000 Metal028_2K-PNG_NormalGL.png

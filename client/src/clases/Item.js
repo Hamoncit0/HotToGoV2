@@ -17,9 +17,9 @@ manager.onError = function (url){
 }
 
 export default class Item {
-  constructor(scene, modelPath, position) {
+  constructor(scene, modelPath, position, name = "object") {
     this.scene = scene;
-
+    this.name = name;
     const mtlLoader = new MTLLoader(manager);
     const objLoader = new OBJLoader(manager);
 
@@ -44,10 +44,14 @@ export default class Item {
       });
     });
   }
+  
+  updatePosition(newPosition) {
+    this.mesh.position.copy(newPosition);
+  }
 
   // Método para detectar si el jugador está cerca
-  isNear(player) {
-    return this.collisionBox.intersectsBox(player.collisionBox);
+  isNear(collisionBox) {
+    return this.collisionBox.intersectsBox(collisionBox);
   }
 
   // Método para esconder el objeto (por ejemplo, cuando es recogido)

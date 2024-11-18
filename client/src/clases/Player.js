@@ -49,7 +49,7 @@ export default class Player {
   }
 
   pickUpObject(object) {
-    if (object.isNear(this)) {
+    if (!this.heldObject && object.isNear(this.collisionBox)) {
       this.heldObject = object;
       //object.hide();
     }
@@ -69,8 +69,8 @@ export default class Player {
   holdObjectInFront() {
     if (this.heldObject && this.heldObject.mesh) {
       const holdPosition = new THREE.Vector3(0, 0.5, 0.7);
-      holdPosition.applyQuaternion(this.mesh.quaternion);
-      this.heldObject.mesh.position.copy(this.mesh.position).add(holdPosition);
+      holdPosition.applyQuaternion(this.mesh.quaternion).add(this.mesh.position);
+	  this.heldObject.updatePosition(holdPosition);
     }
   }
 

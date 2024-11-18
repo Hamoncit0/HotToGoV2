@@ -4,7 +4,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 //clases
 import Player from './src/clases/Player.js'
 import {ScreenController} from './src/clases/ScreenController.js';
-import Item from './src/clases/Item.js';
+//import Item from './src/clases/Item.js';
+import Dispenser from './src/clases/Dispenser.js';
 
 // Configuración básica
 const container = document.getElementById('threejs-container');
@@ -26,9 +27,6 @@ let clock = new THREE.Clock(); // Reloj para medir el tiempo
 
 const localPlayer = new Player(scene, './src/models/players/player_1v4.gltf', { x: 0, y: 2, z: -2 });
 
-const controls = new OrbitControls(camera, renderer.domElement);
-
-
 //Controlador de pantallas
 const screenController = new ScreenController(container, renderer, clock, animate, scene, camera);
 
@@ -40,7 +38,7 @@ window.addEventListener('resize', () => {
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
 });
-const speed = 0.10;
+const speed = 0.6;
 const keyboard = {};
 document.addEventListener('keydown', (event) => {
   keyboard[event.key] = true;
@@ -50,7 +48,7 @@ document.addEventListener('keyup', (event) => {
 });
 let colisionado = false;
 let collisionCooldown = 10000
-const apple = new Item(scene, './src/models/comida/Pizza', { x: -2, y: 2.5, z: -2 });
+const dispenser = new Dispenser(scene, {x: -2, y: 2.5, z: -2});
 function animate(isGameRunning, isGamePaused) {
     if (!isGameRunning || isGamePaused) return;
 
@@ -70,17 +68,16 @@ function animate(isGameRunning, isGamePaused) {
       }
     });
 
-    // if (apple.isNear(localPlayer)) {
-    //   console.log('huh')
-    //   localPlayer.pickUpObject(apple);
-    // }
-    window.addEventListener('keydown', (event) => {
-      if (event.key === 'e') { // Presiona 'e' para recoger el objeto
-        localPlayer.pickUpObject(apple);
-      } else if (event.key === 'q') { // Presiona 'q' para soltar el objeto
-        localPlayer.dropObject();
-      }
-    });
+	window.addEventListener('keyup', (event) => {
+		if (event.key === 'f' && dispenser.canDispense && dispenser.isNear(localPlayer)) { // Presiona "f" para generar una pizza
+		  dispenser.dispenseAgua();
+		} else if (event.key === 'e' && !localPlayer.heldObject) { // Presiona "e" para recoger la pizza más cercana
+		  dispenser.items.forEach(pizza => localPlayer.pickUpObject(pizza));
+		}
+    else if(event.key === 'e' && localPlayer.heldObject){
+      localPlayer.dropObject();
+    }
+	  });
 
     renderer.render(scene, camera);
 }

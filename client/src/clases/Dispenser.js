@@ -1,12 +1,12 @@
 import * as THREE from 'three';
-import Item from './Item';
+import Item from './Item.js';
 
 export default class Dispenser {
     constructor(scene, position) {
       this.scene = scene;
-      this.position = position;
-      this.items = []; // Array para almacenar las pizzas generadas
-  
+      this.position = new THREE.Vector3(position.x, position.y, position.z);
+      this.items = []; // Array para almacenar las items generadas
+      this.canDispense = true;
       // Crear el modelo de la estufa (dispenser)
       this.mesh = new THREE.Mesh(
         new THREE.BoxGeometry(1, 1, 1),
@@ -27,9 +27,76 @@ export default class Dispenser {
   
     // Método para generar una pizza
     dispensePizza() {
-      const pizzaPosition = this.position.clone();
-      pizzaPosition.y += 1; // Colocar la pizza sobre el dispenser
-      const pizza = new Item(this.scene, './src/models/comida/Pizza' ,pizzaPosition);
-      this.pizzas.push(pizza);
+
+      if (this.canDispense) {
+        const itemPosition = this.position.clone();
+        itemPosition.y += 1; // Colocar la pizza sobre el dispenser
+        const pizza = new Item(this.scene, './src/models/comida/Pizza', itemPosition, 'pizza');
+        this.items.push(pizza);
+        
+        // Bloquea el dispensador para evitar crear más items en este ciclo
+        this.canDispense = false;
+        
+        // Establece un tiempo de espera de 1 segundo antes de poder dispensar otra pizza
+        setTimeout(() => {
+          this.canDispense = true; // Vuelve a permitir dispensar una pizza
+        }, 1000); // 1000 ms = 1 segundo
+      }
     }
+    // Método para generar una pizza
+     
+    dispenseLasagna() {
+
+      if (this.canDispense) {
+        const itemPosition = this.position.clone();
+        itemPosition.y += 1; // Colocar la pizza sobre el dispenser
+        const pizza = new Item(this.scene, './src/models/comida/Lasana', itemPosition, 'lasagna');
+        this.items.push(pizza);
+        
+        // Bloquea el dispensador para evitar crear más items en este ciclo
+        this.canDispense = false;
+        
+        // Establece un tiempo de espera de 1 segundo antes de poder dispensar otra pizza
+        setTimeout(() => {
+          this.canDispense = true; // Vuelve a permitir dispensar una pizza
+        }, 1000); // 1000 ms = 1 segundo
+      }
+    }
+    // Método para generar una pizza
+    dispenseRisotto() {
+
+      if (this.canDispense) {
+        const itemPosition = this.position.clone();
+        itemPosition.y += 1; // Colocar la pizza sobre el dispenser
+        const pizza = new Item(this.scene, './src/models/comida/Risoto', itemPosition, 'risoto');
+        this.items.push(pizza);
+        
+        // Bloquea el dispensador para evitar crear más items en este ciclo
+        this.canDispense = false;
+        
+        // Establece un tiempo de espera de 1 segundo antes de poder dispensar otra pizza
+        setTimeout(() => {
+          this.canDispense = true; // Vuelve a permitir dispensar una pizza
+        }, 1000); // 1000 ms = 1 segundo
+      }
+    }
+
+    dispenseAgua() {
+
+      if (this.canDispense) {
+        const itemPosition = this.position.clone();
+        itemPosition.y += 1; // Colocar la pizza sobre el dispenser
+        const pizza = new Item(this.scene, './src/models/comida/Vaso', itemPosition, 'agua');
+        this.items.push(pizza);
+        
+        // Bloquea el dispensador para evitar crear más items en este ciclo
+        this.canDispense = false;
+        
+        // Establece un tiempo de espera de 1 segundo antes de poder dispensar otra pizza
+        setTimeout(() => {
+          this.canDispense = true; // Vuelve a permitir dispensar una pizza
+        }, 1000); // 1000 ms = 1 segundo
+      }
+    }
+
   }
