@@ -208,7 +208,7 @@ h1{
   justify-content: left;
   height: 100%;
   width: 100%;
-  padding: 10%;
+  padding: 5%;
   background-image: url('./imagenes/fondo.png');
   .btn{
     font-size: 3rem;

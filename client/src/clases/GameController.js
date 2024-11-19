@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
-
+import PowerUp from './PowerUp.js';
 export default class GameController {
     constructor(scene, player) {
         this.scene = scene;
@@ -12,6 +12,12 @@ export default class GameController {
         this.timeRemaining = 300; // Tiempo en segundos
         this.deliveryZones = []; // Zonas de entrega
 
+
+        //Variables que controlan la dificultad
+        this.orderFrequency = 10000;
+        this.orderMaxTime = 30;
+        this.maxOrderCapacity = 4;
+
         this.clock = new THREE.Clock();
         this.isPlaying = false;
 
@@ -20,6 +26,13 @@ export default class GameController {
         this.scoreElement = document.getElementById('score');
         this.timeElement = document.getElementById('time');
 
+        this.powerUps = [];
+        
+        const powerUp1 = new PowerUp(scene, './src/models/power-ups/monster', { x: -2, y: 2, z: -2 }, "speed");
+        const powerUp2 = new PowerUp(scene, './src/models/power-ups/timer', { x: 0, y: 2, z: -2 }, "time");
+        const powerUp3 = new PowerUp(scene, './src/models/power-ups/coin', { x: 2, y: 2, z: -2 }, "points");
+
+        this.powerUps.push(powerUp1, powerUp2, powerUp3); 
         // Intervalo para decrementar el tiempo
         setInterval(() => {
             if (this.isPlaying && this.timeRemaining > 0) {
@@ -46,14 +59,14 @@ export default class GameController {
             const orderElement = document.createElement('div');
             orderElement.classList.add('orden');
             let color ='#00FF00';
-            if(order.timeRemaining>= 21){
+            if(order.timeRemaining>= (this.orderMaxTime * .7)){
                 color ='#00FF00';
 
             }
-            else if(order.timeRemaining >= 15){
+            else if(order.timeRemaining >= (this.orderMaxTime * .5)){
                 color ='#FFFF00';
             }
-            else if(order.timeRemaining >= 10){
+            else if(order.timeRemaining >= (this.orderMaxTime * .3)){
                 color = '#FF7700';
             }
             else{
@@ -65,7 +78,7 @@ export default class GameController {
                     <img src="./imagenes/${order.item.toLowerCase()}.png" alt="${order.item}">
                     <h3>${order.item}</h3>
                 </div>
-                <div class="orden-timeleft" style="width: ${order.timeRemaining * 3.3}%; background-color: ${color}; "></div>
+                <div class="orden-timeleft" style="width: ${(order.timeRemaining * 100) / (this.orderMaxTime)}%; background-color: ${color}; "></div>
             `;
 
             this.ordersContainer.appendChild(orderElement);
@@ -105,7 +118,7 @@ export default class GameController {
 
         const newOrder = {
             item: randomItem,
-            timeRemaining: 30, // Tiempo para entregar la orden en segundos
+            timeRemaining: this.orderMaxTime, // Tiempo para entregar la orden en segundos
         };
 
         this.orders.push(newOrder);
@@ -170,5 +183,12 @@ export default class GameController {
             this.isPlaying = false;
             console.log(`Juego terminado. Puntuación final: ${this.points}`);
         }
+        // Verificar colisiones con PowerUps
+        this.powerUps.forEach((powerUp, index) => {
+            if (powerUp.isNear(this.player.collisionBox)) {
+            powerUp.applyEffect(this.player, this);
+            powerUps.splice(index, 1); // Eliminar el power-up del array
+            }
+        });
     }
 }

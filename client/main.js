@@ -41,7 +41,7 @@ setInterval(() => {
   if (gameController.isPlaying) {
       gameController.generateOrder();
   }
-}, 10000);
+}, gameController.orderFrequency);
 // Ajuste de ventana
 window.addEventListener('resize', () => {
     const width = container.clientWidth;
@@ -61,10 +61,15 @@ document.addEventListener('keyup', (event) => {
 let colisionado = false;
 let collisionCooldown = 10000
 
+// Crear un array para los dispensers
+const dispensers = [];
 
-const dispenser = new Dispenser(scene, {x: -4, y: 2, z: -6}, camera, 'Pizza');
-const dispenserLasagna = new Dispenser(scene, {x: -2, y: 2, z: -6}, camera, 'Risoto');
-const rat = new Rat(scene, {x: -2, y: 2, z: -3})
+// Agregar dispensers al array
+dispensers.push(new Dispenser(scene, { x: -4, y: 2, z: -6 }, camera, 'Pizza'));
+dispensers.push(new Dispenser(scene, { x: -2, y: 2, z: -6 }, camera, 'Risoto'));
+dispensers.push(new Dispenser(scene, { x: 0, y: 2, z: -6 }, camera, 'Lasagna'));
+dispensers.push(new Dispenser(scene, { x: 2, y: 2, z: -6 }, camera, 'Agua'));
+// Agrega los power-ups a un array global o del controlador
 
 function animate(isGameRunning, isGamePaused) {
 
@@ -74,33 +79,36 @@ function animate(isGameRunning, isGamePaused) {
     requestAnimationFrame(animate);
     const deltaTime = clock.getDelta();
 
-     localPlayer.update(deltaTime);
 
      if (keyboard['w'] || keyboard['W']) localPlayer.move(0, 0, -speed);
      if (keyboard['s'] || keyboard['S']) localPlayer.move(0, 0, speed);
      if (keyboard['a'] || keyboard['A']) localPlayer.move(-speed, 0, 0);
      if (keyboard['d'] || keyboard['D']) localPlayer.move(speed, 0, 0);
 
-     scene.children.forEach((object) => {
-      if (object.collisionBox && checkCollision(localPlayer, object)) {
-          localPlayer.revertPosition()
-      }
+    scene.children.forEach((object) => {
+        if (object.collisionBox && checkCollision(localPlayer, object)) {
+            localPlayer.revertPosition()
+        }
     });
 
-	window.addEventListener('keyup', (event) => {
-		if (event.key === 'f' && dispenserLasagna.canDispense && dispenserLasagna.isNear(localPlayer)) { // Presiona "f" para generar una pizza
-		  dispenserLasagna.dispenseItem();
-		} else if (event.key === 'e' && !localPlayer.heldObject) { // Presiona "e" para recoger la pizza más cercana
-		  dispenserLasagna.items.forEach(pizza => localPlayer.pickUpObject(pizza));
-		}
-    else if(event.key === 'e' && localPlayer.heldObject){
-      localPlayer.dropObject();
-    }
-	  });
+	// Interacción con dispensers al presionar teclas
+    window.addEventListener('keyup', (event) => {
+      dispensers.forEach((dispenser) => {
+         if (event.key === 'f' && dispenser.canDispense && dispenser.isNear(localPlayer)) {
+                dispenser.dispenseItem(); // Genera un ítem del dispenser
+            } else if (event.key === 'e' && !localPlayer.heldObject) {
+                dispenser.items.forEach((item) => localPlayer.pickUpObject(item));
+            } else if (event.key === 'e' && localPlayer.heldObject) {
+                localPlayer.dropObject();
+          }
+      });
+    });
+
+    // Actualizar cada dispenser
+    dispensers.forEach((dispenser) => dispenser.update());
+    localPlayer.update(deltaTime);
 
     gameController.update();
-    dispenserLasagna.update();
-    rat.update(deltaTime);
     renderer.render(scene, camera);
 }
 

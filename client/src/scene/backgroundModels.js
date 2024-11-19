@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { loadModel } from '../clases/modelLoader.js'
-import Item from '../clases/Item.js';
 
 export function city(scene) {
     loadModel('./src/models/muebles_separados/arriba', 'arriba', scene, { x: 0, y: Math.PI/2, z: 0 }, { x: 0, y: 0, z: 0 }, true)

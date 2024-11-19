@@ -49,6 +49,7 @@ export class ScreenController {
             goBackPlayer: document.getElementById('go-back-player'),
             goBackMap: document.getElementById('go-back-map'),
             goBackUser: document.getElementById('go-back-username'),
+            goBackDifficulty: document.getElementById('go-back-difficulty'),
             continue: document.getElementById('resume-btn'),
             settings: document.getElementById('settings'),
             highscore: document.getElementById('highscore-btn'),
@@ -85,8 +86,9 @@ export class ScreenController {
         this.Buttons.continue.addEventListener('click', () => this.resumeGame());
         this.Buttons.end.addEventListener('click', () => this.goToScreen(this.Screens.MAIN));
         this.Buttons.goBackPlayer.addEventListener('click', () => this.goToScreen(this.Screens.MAIN));
-        this.Buttons.goBackMap.addEventListener('click', () => this.goToScreen(this.Screens.PLAYER));
+        this.Buttons.goBackMap.addEventListener('click', () => this.goToScreen(this.Screens.DIFFICULTY));
         this.Buttons.goBackUser.addEventListener('click', () => this.goToScreen(this.Screens.MAP));
+        this.Buttons.goBackDifficulty.addEventListener('click', () => this.goToScreen(this.Screens.PLAYER));
         this.Buttons.settings.addEventListener('click', () => this.goToScreen(this.Screens.SETTINGS));
 
         window.addEventListener('keydown', (event) => this.handleKeydown(event));
