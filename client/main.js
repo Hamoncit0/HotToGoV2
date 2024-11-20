@@ -102,8 +102,11 @@ function animate(isGameRunning, isGamePaused) {
                 localPlayer.dropObject();
           }
       });
+      if(event.key == 'j'){
+        console.log(localPlayer.mesh.position)
+      }
+  
     });
-
     // Actualizar cada dispenser
     dispensers.forEach((dispenser) => dispenser.update());
     localPlayer.update(deltaTime);

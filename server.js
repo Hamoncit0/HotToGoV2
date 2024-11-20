@@ -10,14 +10,16 @@ const server = createServer(app);
 const io = new Server(server);
 
 
+app.use('/client',express.static( join(__dirname, '/client')))
 app.use('/models',express.static( join(__dirname, 'models')))
-app.use('/src',express.static( join(__dirname, 'src')))
-app.use('/imagenes',express.static( join(__dirname, 'imagenes')))
-app.use('/scss',express.static( join(__dirname, 'scss')))
-app.use(express.static( join(__dirname)))
+app.use('/src',express.static( join(__dirname, '/client/src')))
+app.use('/imagenes', express.static(join(__dirname, 'client/imagenes')));
+app.use('/scss', express.static(join(__dirname, 'client/scss')));
+app.use(express.static(join(__dirname, 'client')));
+
 
 app.get('/', (req, res) => {
-  res.sendFile(join(__dirname, 'index.html'));
+  res.sendFile(join(__dirname, '/client/index.html'));
 });
 
 io.on('connection', (socket) => {

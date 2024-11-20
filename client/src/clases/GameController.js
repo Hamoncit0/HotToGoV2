@@ -9,9 +9,9 @@ export default class GameController {
 
         this.orders = []; // Array para guardar órdenes
         this.points = 0; // Puntuación inicial
-        this.timeRemaining = 300; // Tiempo en segundos
+        this.timeRemaining = 120; // Tiempo en segundos
         this.deliveryZones = []; // Zonas de entrega
-
+        this.screenController = null;
 
         //Variables que controlan la dificultad
         this.orderFrequency = 10000;
@@ -20,6 +20,7 @@ export default class GameController {
 
         this.clock = new THREE.Clock();
         this.isPlaying = false;
+        this.isGameOver = false;
 
         // Referencias a elementos de la interfaz
         this.ordersContainer = document.querySelector('.ordenes');
@@ -27,20 +28,84 @@ export default class GameController {
         this.timeElement = document.getElementById('time');
 
         this.powerUps = [];
-        
-        const powerUp1 = new PowerUp(scene, './src/models/power-ups/monster', { x: -2, y: 2, z: -2 }, "speed");
-        const powerUp2 = new PowerUp(scene, './src/models/power-ups/timer', { x: 0, y: 2, z: -2 }, "time");
-        const powerUp3 = new PowerUp(scene, './src/models/power-ups/coin', { x: 2, y: 2, z: -2 }, "points");
+        this.spawnPowerUpsRandomly();
 
-        this.powerUps.push(powerUp1, powerUp2, powerUp3); 
         // Intervalo para decrementar el tiempo
         setInterval(() => {
             if (this.isPlaying && this.timeRemaining > 0) {
                 this.timeRemaining--;
                 this.updateTimeDisplay();
+    
+                // Verificar fin del juego
+                if (this.timeRemaining <= 0) {
+                    this.screenController.endGame();
+                    this.endGame();
+                }
             }
         }, 1000);
     } 
+
+    endGame() {
+        this.isPlaying = false;
+        this.isGameOver = true; // Marca el juego como terminado
+        console.log(`Juego terminado. Puntuación final: ${this.points}`);
+        // Aquí puedes agregar lógica adicional, como mostrar un mensaje en pantalla
+        alert(`Fin del juego. Puntuación final: ${this.points}`);
+    }
+    
+    // Función para generar posiciones aleatorias dentro de un rango
+    getRandomPosition(min, max) {
+        console.log('generando posicion');
+        return new THREE.Vector3(
+            Math.random() * (max.x - min.x) + min.x,
+            Math.random() * (max.y - min.y) + min.y,
+            Math.random() * (max.z - min.z) + min.z
+        );
+    }
+    // Generar power-ups aleatoriamente en el rango especificado
+    spawnPowerUpsRandomly() {
+        console.log('Iniciando generación aleatoria de PowerUps');
+        // Define el rango para la posición de los PowerUps
+        const minPosition = new THREE.Vector3(3, 2, -2);
+        const maxPosition = new THREE.Vector3(-6, 2, -6);
+    
+        // Define el rango para el tiempo (en milisegundos)
+        const minTime = 5000; // 5 segundos
+        const maxTime = 15000; // 15 segundos
+    
+        // Función para generar PowerUps y programar el siguiente
+        const spawnNext = () => {
+            // Solo generar PowerUps si el juego está en progreso
+            if (!this.isPlaying) spawnNext;
+    
+            // Verificar si ya hay 2 PowerUps en el mapa
+            if (this.powerUps.length >= 2) {
+                console.log('Se alcanzó el límite de PowerUps en el mapa');
+            } else {
+                // Generar un PowerUp aleatorio
+                const powerUpTypes = [
+                    { modelPath: './src/models/power-ups/monster', effect: 'speed' },
+                    { modelPath: './src/models/power-ups/timer', effect: 'time' },
+                    { modelPath: './src/models/power-ups/coin', effect: 'points' }
+                ];
+                const randomType = powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)];
+                const randomPosition = this.getRandomPosition(minPosition, maxPosition);
+    
+                const powerUp = new PowerUp(this.scene, randomType.modelPath, randomPosition, randomType.effect);
+                this.powerUps.push(powerUp);
+    
+                console.log(`PowerUp generado: ${randomType.effect} en posición`, randomPosition);
+            }
+    
+            // Programar el siguiente intento de generación después de un tiempo aleatorio
+            const nextTime = Math.random() * (maxTime - minTime) + minTime;
+            setTimeout(spawnNext, nextTime);
+        };
+    
+        // Iniciar la primera generación
+        spawnNext();
+    }
+    
     
     updateTimeDisplay() {
         const minutes = Math.floor(this.timeRemaining / 60);
@@ -178,16 +243,11 @@ export default class GameController {
             }
         });
 
-        // Fin del juego
-        if (this.timeRemaining <= 0) {
-            this.isPlaying = false;
-            console.log(`Juego terminado. Puntuación final: ${this.points}`);
-        }
         // Verificar colisiones con PowerUps
         this.powerUps.forEach((powerUp, index) => {
             if (powerUp.isNear(this.player.collisionBox)) {
             powerUp.applyEffect(this.player, this);
-            powerUps.splice(index, 1); // Eliminar el power-up del array
+            this.powerUps.splice(index, 1); // Eliminar el power-up del array
             }
         });
     }

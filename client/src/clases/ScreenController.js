@@ -21,6 +21,8 @@ export class ScreenController {
         this.mapSelected = 0; // 0: city, 1: beach
         this.difficulty = 0; // 0: normal, 1: hard
         this.gameController = gameController;
+        this.gameController.screenController = this;
+
         // PANTALLAS
         this.Screens = {
             MAIN: document.getElementById('game-ui'),
@@ -121,9 +123,7 @@ export class ScreenController {
         this.mapSelected = map;
 
         this.camera.updateProjectionMatrix(); 
-
-        if (this.playerModeSelected === 0) this.startGame();
-        else this.goToScreen(this.Screens.USERNAME);
+        this.goToScreen(this.Screens.USERNAME);
     }
 
     startGame() {
@@ -162,12 +162,14 @@ export class ScreenController {
 
     pauseGame() {
         this.isGamePaused = true;
+        this.gameController.isPlaying = false;
         this.clock.stop();
         this.goToScreen(this.Screens.PAUSE);
     }
 
     resumeGame() {
         this.isGamePaused = false;
+        this.gameController.isPlaying = true;
         this.goToScreen(this.Screens.GAME);
         this.renderer.setSize(this.Screens.GAME.clientWidth, this.Screens.GAME.clientHeight);
         this.clock.start();
@@ -178,8 +180,9 @@ export class ScreenController {
         this.isGameRunning = false;
         this.isGamePaused = false;
         this.clock.stop();
-        this.Screens.PAUSE.setAttribute('hidden', true);
-        this.Screens.GAMEOVER.style.display = 'block';
-        this.Screens.GAME.setAttribute('hidden', true);
+        this.goToScreen(this.Screens.GAMEOVER);
+        // this.Screens.PAUSE.setAttribute('hidden', true);
+        // this.Screens.GAMEOVER.style.display = 'block';
+        // this.Screens.GAME.setAttribute('hidden', true);
     }
 }

@@ -61,6 +61,11 @@
                 <button  id="settings" class="btn btn-primary settings-btn d-flex align-items-center justify-content-center"><i style="font-size: 3rem;" class="bi bi-gear-fill"></i></button>
                 <button  id="highscore-btn" class="btn btn-primary settings-btn d-flex align-items-center justify-content-center"><i style="font-size: 3rem;" class="bi bi-building-fill-up"></i></button>
             </div>
+            
+            <fb:login-button 
+            scope="public_profile,email"
+            onlogin="checkLoginState();">
+            </fb:login-button>
         </div>
     </div>
     <!-- multiplayer or singleplayer -->
@@ -173,5 +178,6 @@
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script> 
     <script type="module" src="./main.js">
     </script>
+    <script src="/client/Facebook.js"></script>
 </body>
 </html>
