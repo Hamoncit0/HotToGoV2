@@ -32,7 +32,6 @@ export default class GameController {
 
         this.powerUps = [];
         this.spawnPowerUpsRandomly();
-        this.stunCooldown = false; // Evitar que el jugador sea aturdido múltiples veces rápidamente
 
         this.rats = [];  // Guardar todas las ratas aquí
 
@@ -53,10 +52,8 @@ export default class GameController {
     } 
 
     startspawnrat(){
-        console.log('huh1')
 		// Verificar la dificultad y generar ratas solo si la dificultad es "Dificil"
         if (this.screenController.difficulty === 1) {
-            console.log('huh')
             // Spawn de ratas a intervalos aleatorios
             setInterval(() => {
                 if (this.isPlaying) {
@@ -72,19 +69,6 @@ export default class GameController {
         const rat = new Rat(this.scene, randomPosition);
         this.rats.push(rat);
         console.log("Rata generada en:", randomPosition);
-    }
-
-    // Aturdir al jugador cuando colisiona con una rata
-    stunPlayer() {
-        if (this.stunCooldown) return;
-
-        this.stunCooldown = true;
-        this.player.isStunned = true;
-
-        setTimeout(() => {
-            this.player.isStunned = false;
-            this.stunCooldown = false;
-        }, 1000); // Aturdir por 1 segundo
     }
 
 
@@ -288,13 +272,14 @@ export default class GameController {
 
         // Actualizar ratas y verificar colisiones
         this.rats.forEach((rat) => {
-            rat.update(delta, this.player, this.screenController.difficulty);
-
+			if (rat.mesh) {
+				rat.update(delta, this.player, this.screenController.difficulty);
+			}
         });
 
         // Verificar colisiones con PowerUps
         this.powerUps.forEach((powerUp, index) => {
-            if (powerUp.isNear(this.player.collisionBox)) {
+            if (powerUp.mesh && powerUp.isNear(this.player.collisionBox)) {
             powerUp.applyEffect(this.player, this);
             this.powerUps.splice(index, 1); // Eliminar el power-up del array
             }

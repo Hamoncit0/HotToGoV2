@@ -8,6 +8,7 @@ export default class Player {
     this.heldObject = null; // Objeto que el jugador está sosteniendo
     this.actionInProgress = false; // Controla si una acción está en progreso
     this.speedMultiplier = 1; // Velocidad inicial
+	this.isStunned = false; // Para evitar que el jugador sea aturdido múltiples veces rápidamente
 
     const loader = new GLTFLoader();
     loader.load(modelPath, (gltf) => {
@@ -103,5 +104,16 @@ export default class Player {
     }
   }
 
-  
+  // Aturdir al jugador cuando colisiona con una rata
+  stun(stunDuration) {
+	if(this.isStunned) return;
+
+	this.isStunned = true;
+	this.speedMultiplier = 0;
+
+	setTimeout(() => {
+		this.speedMultiplier = 1;
+		this.isStunned = false;
+	}, stunDuration * 1000); // Aturdir por 1 segundo
+  }
 }
