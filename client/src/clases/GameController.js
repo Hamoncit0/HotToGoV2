@@ -2,6 +2,9 @@ import * as THREE from 'three';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 import PowerUp from './PowerUp.js';
+import Rat from './Rat.js';
+
+
 export default class GameController {
     constructor(scene, player) {
         this.scene = scene;
@@ -9,7 +12,7 @@ export default class GameController {
 
         this.orders = []; // Array para guardar órdenes
         this.points = 0; // Puntuación inicial
-        this.timeRemaining = 10; // Tiempo en segundos
+        this.timeRemaining = 120; // Tiempo en segundos
         this.deliveryZones = []; // Zonas de entrega
         this.screenController = null;
 
@@ -29,6 +32,10 @@ export default class GameController {
 
         this.powerUps = [];
         this.spawnPowerUpsRandomly();
+        this.stunCooldown = false; // Evitar que el jugador sea aturdido múltiples veces rápidamente
+
+        this.rats = [];  // Guardar todas las ratas aquí
+
 
         // Intervalo para decrementar el tiempo
         setInterval(() => {
@@ -44,6 +51,42 @@ export default class GameController {
             }
         }, 1000);
     } 
+
+    startspawnrat(){
+        console.log('huh1')
+		// Verificar la dificultad y generar ratas solo si la dificultad es "Dificil"
+        if (this.screenController.difficulty === 1) {
+            console.log('huh')
+            // Spawn de ratas a intervalos aleatorios
+            setInterval(() => {
+                if (this.isPlaying) {
+                    this.spawnRat();  // Generar una nueva rata cada 2-5 segundos
+                }
+            }, Math.random() * (5000 - 2000) + 2000); // Intervalo aleatorio entre 2-5 segundos
+        }
+	}
+
+    // Generar una rata en una posición aleatoria
+    spawnRat() {
+        const randomPosition = this.getRandomPosition(new THREE.Vector3(-5, 2, -5), new THREE.Vector3(5, 2, -5));
+        const rat = new Rat(this.scene, randomPosition);
+        this.rats.push(rat);
+        console.log("Rata generada en:", randomPosition);
+    }
+
+    // Aturdir al jugador cuando colisiona con una rata
+    stunPlayer() {
+        if (this.stunCooldown) return;
+
+        this.stunCooldown = true;
+        this.player.isStunned = true;
+
+        setTimeout(() => {
+            this.player.isStunned = false;
+            this.stunCooldown = false;
+        }, 1000); // Aturdir por 1 segundo
+    }
+
 
     endGame() {
         this.isPlaying = false;
@@ -243,6 +286,12 @@ export default class GameController {
             }
         });
 
+        // Actualizar ratas y verificar colisiones
+        this.rats.forEach((rat) => {
+            rat.update(delta, this.player, this.screenController.difficulty);
+
+        });
+
         // Verificar colisiones con PowerUps
         this.powerUps.forEach((powerUp, index) => {
             if (powerUp.isNear(this.player.collisionBox)) {
@@ -251,4 +300,9 @@ export default class GameController {
             }
         });
     }
+
+    checkCollision(player1, object) {
+      return player1.collisionBox.intersectsBox(object.collisionBox);
+    }
+    
 }

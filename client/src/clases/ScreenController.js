@@ -184,7 +184,7 @@ export class ScreenController {
             setUpLightingMinecraft(this.scene);
         }
 
-
+        this.gameController.startspawnrat();
         this.clock.start();
         this.animate(this.isGameRunning, this.isGamePaused);
     }
