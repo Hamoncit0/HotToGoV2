@@ -34,7 +34,8 @@ export class ScreenController {
             USERNAME: document.getElementById('username-input'),
             GAMEOVER: document.getElementById('game-over'),
             GAME: container,
-            SETTINGS: document.getElementById('config-screen')
+            SETTINGS: document.getElementById('config-screen'),
+            HIGHSCORES: document.getElementById('highscores')
         };
 
         // BOTONES
@@ -56,6 +57,9 @@ export class ScreenController {
             continue: document.getElementById('resume-btn'),
             settings: document.getElementById('settings'),
             highscore: document.getElementById('highscore-btn'),
+            goBackEnd: document.getElementById('btn-go-back-end'),
+            goBackSettings: document.getElementById('btn-go-back-settings'),
+            goBackHighscores: document.getElementById('btn-go-back-highscores'),
         };
         this.audioManager.loadBackgroundMusic('./src/sounds/Spagonia (Day) - Sonic Unleashed [OST].mp3');
 
@@ -87,12 +91,16 @@ export class ScreenController {
         this.Buttons.minecraft.addEventListener('click', () => this.selectMap(2));
         this.Buttons.join.addEventListener('click', () => this.startGame());
         this.Buttons.continue.addEventListener('click', () => this.resumeGame());
-        this.Buttons.end.addEventListener('click', () => this.goToScreen(this.Screens.MAIN));
+        this.Buttons.end.addEventListener('click', () => location.reload());
         this.Buttons.goBackPlayer.addEventListener('click', () => this.goToScreen(this.Screens.MAIN));
         this.Buttons.goBackMap.addEventListener('click', () => this.goToScreen(this.Screens.DIFFICULTY));
         this.Buttons.goBackUser.addEventListener('click', () => this.goToScreen(this.Screens.MAP));
         this.Buttons.goBackDifficulty.addEventListener('click', () => this.goToScreen(this.Screens.PLAYER));
+        this.Buttons.goBackEnd.addEventListener('click', () => location.reload());
         this.Buttons.settings.addEventListener('click', () => this.goToScreen(this.Screens.SETTINGS));
+        this.Buttons.goBackSettings.addEventListener('click', () => this.goToScreen(this.Screens.MAIN));
+        this.Buttons.highscore.addEventListener('click', () => this.goToScreen(this.Screens.HIGHSCORES));
+        this.Buttons.goBackHighscores.addEventListener('click', () => this.goToScreen(this.Screens.MAIN));
 
         window.addEventListener('keydown', (event) => this.handleKeydown(event));
     }
@@ -108,6 +116,20 @@ export class ScreenController {
         if (this.actualScreen) this.actualScreen.style.display = 'none';
         this.actualScreen = screen;
         this.actualScreen.style.display = 'block';
+
+        if(screen == this.Screens.HIGHSCORES){
+            getHighscores()
+            .then((highscores)=>{
+                const highscoreList = document.getElementById('highscore-list-in-highscores'); // Asegúrate de tener este elemento en tu HTML
+                highscoreList.innerHTML = '';
+    
+                highscores.forEach((score, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `${score.name}: ${score.score}`;
+                    highscoreList.appendChild(listItem);
+                });
+            })
+        }
     }
 
     selectPlayerMode(mode) {
