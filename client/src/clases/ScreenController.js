@@ -3,6 +3,7 @@ import { city, beach, minecraft } from "../scene/backgroundModels.js";
 import { setupLighting, setUpLightingBeach, setUpLightingMinecraft } from '../scene/lighting.js';
 import AudioManager from './AudioManager.js';
 import GameController from "./GameController.js";
+import { getHighscores, saveHighscore } from "../webServices/webService.js";
 
 import * as THREE from 'three';
 export class ScreenController {
@@ -123,10 +124,16 @@ export class ScreenController {
         this.mapSelected = map;
 
         this.camera.updateProjectionMatrix(); 
-        this.goToScreen(this.Screens.USERNAME);
+        if( document.getElementById('idNombreJugador').value == ''){
+            this.goToScreen(this.Screens.USERNAME);
+        }
+        else {
+            this.startGame();
+        }
     }
 
     startGame() {
+        this.gameController.player.name = document.getElementById('idNombreJugador').value;
         this.isGameRunning = true;
         this.gameController.isPlaying = true;
         this.goToScreen(this.Screens.GAME);
@@ -181,8 +188,31 @@ export class ScreenController {
         this.isGamePaused = false;
         this.clock.stop();
         this.goToScreen(this.Screens.GAMEOVER);
-        // this.Screens.PAUSE.setAttribute('hidden', true);
-        // this.Screens.GAMEOVER.style.display = 'block';
-        // this.Screens.GAME.setAttribute('hidden', true);
+
+         // Obtener el nombre del jugador actual y su puntuación
+        const playerName = this.gameController.player.name;
+        const playerScore = this.gameController.points; 
+
+        saveHighscore(playerName, playerScore)
+        .then(() => {
+            console.log('Highscore guardado correctamente');
+            
+            // Obtener el top 5 de highscores y mostrarlos
+            return getHighscores();
+        })
+        .then((highscores)=>{
+            console.log('Top 5 Highscores:', highscores);
+            const highscoreList = document.getElementById('highscore-list'); // Asegúrate de tener este elemento en tu HTML
+            highscoreList.innerHTML = '';
+
+            highscores.forEach((score, index) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${score.name}: ${score.score}`;
+                highscoreList.appendChild(listItem);
+            });
+        })
+        .catch((error) => {
+            console.error('Error al manejar los high scores:', error);
+        });
     }
 }

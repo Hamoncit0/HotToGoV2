@@ -2,7 +2,7 @@ CREATE DATABASE db_HotToGo;
 
 CREATE TABLE Highscore(
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100),
+    name VARCHAR(100) UNIQUE NOT NULL,
     score INT,
     updatedAt TIMESTAMP
 )

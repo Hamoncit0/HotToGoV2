@@ -6,6 +6,7 @@ import Player from './src/clases/Player.js'
 import {ScreenController} from './src/clases/ScreenController.js';
 import GameController from './src/clases/GameController.js';
 import Rat from './src/clases/Rat.js'
+
 //import Item from './src/clases/Item.js';
 import Dispenser from './src/clases/Dispenser.js';
 
@@ -70,9 +71,10 @@ dispensers.push(new Dispenser(scene, { x: -2, y: 2, z: -6 }, camera, 'Risoto'));
 dispensers.push(new Dispenser(scene, { x: 0, y: 2, z: -6 }, camera, 'Lasagna'));
 dispensers.push(new Dispenser(scene, { x: 2, y: 2, z: -6 }, camera, 'Agua'));
 // Agrega los power-ups a un array global o del controlador
+// Crear el jugador y el tag de nombre
+const playerNameTag = createPlayerNameTag(localPlayer);
 
 function animate(isGameRunning, isGamePaused) {
-
 
     if (!isGameRunning || isGamePaused) return;
 
@@ -107,14 +109,51 @@ function animate(isGameRunning, isGamePaused) {
       }
   
     });
+
+    // Actualiza la posición del tag del nombre
+    updatePlayerNameTag(playerNameTag, localPlayer, camera);
+
     // Actualizar cada dispenser
     dispensers.forEach((dispenser) => dispenser.update());
+
     localPlayer.update(deltaTime);
 
     gameController.update();
+
     renderer.render(scene, camera);
 }
 
 function checkCollision(player1, object) {
   return player1.collisionBox.intersectsBox(object.collisionBox);
+}
+
+
+function createPlayerNameTag(player) {
+  // Crea un elemento div para el nombre
+  const nameTag = document.createElement('div');
+  nameTag.textContent = player.name;
+  nameTag.style.position = 'absolute';
+  nameTag.style.color = 'black';
+  nameTag.style.fontSize = '14px';
+  nameTag.style.textAlign = 'center';
+
+  // Añádelo al contenedor de nombres
+  document.getElementById('player-names-container').appendChild(nameTag);
+
+  return nameTag;
+}
+
+function updatePlayerNameTag(nameTag, player, camera) {
+  nameTag.textContent = player.name;
+  // Proyecta la posición 3D a coordenadas de pantalla
+  const vector = new THREE.Vector3(player.mesh.position.x - 0.05 , player.mesh.position.y + 2.22, player.mesh.position.z); // +2 para colocarlo encima
+  vector.project(camera);
+
+  // Convierte las coordenadas normalizadas a pixeles
+  const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+  const y = -(vector.y * 0.5 - 0.5) * window.innerHeight;
+
+  // Actualiza la posición del div
+  nameTag.style.left = `${x}px`;
+  nameTag.style.top = `${y}px`;
 }

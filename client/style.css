@@ -298,7 +298,7 @@ h1{
 /* Asegura que el contenedor ocupe todo el espacio disponible */
 #threejs-container {
   position: relative;
-  overflow: visible;
+  overflow: hidden;
   .HUD{
     position: absolute;
     width: 100%;

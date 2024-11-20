@@ -102,4 +102,6 @@ export default class Player {
       this.collisionBox.setFromObject(this.mesh);
     }
   }
+
+  
 }

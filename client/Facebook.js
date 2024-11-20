@@ -43,7 +43,7 @@ window.fbAsyncInit = function () {
       console.log('Usuario conectado.');
       FB.api('/me', function (response) {
         console.log('Bienvenido, ' + response.name);
-        console.log(response);
+        document.getElementById('idNombreJugador').value = response.name;
       });
     } else if (response.status === 'not_authorized') {
       console.log('Usuario conectado pero no autorizó la aplicación.');

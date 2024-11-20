@@ -9,7 +9,7 @@ export default class GameController {
 
         this.orders = []; // Array para guardar órdenes
         this.points = 0; // Puntuación inicial
-        this.timeRemaining = 120; // Tiempo en segundos
+        this.timeRemaining = 10; // Tiempo en segundos
         this.deliveryZones = []; // Zonas de entrega
         this.screenController = null;
 
