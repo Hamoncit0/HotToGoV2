@@ -6,6 +6,8 @@ export default class Player {
     this.scene = scene;
     this.name = name;
     this.heldObject = null; // Objeto que el jugador está sosteniendo
+    this.actionInProgress = false; // Controla si una acción está en progreso
+    this.speedMultiplier = 1; // Velocidad inicial
 
     const loader = new GLTFLoader();
     loader.load(modelPath, (gltf) => {
@@ -33,9 +35,9 @@ export default class Player {
   move(x, y, z) {
     if (this.mesh) {
       this.previousPosition = this.mesh.position.clone();
-      this.mesh.position.x += x;
-      this.mesh.position.y += y;
-      this.mesh.position.z += z;
+      this.mesh.position.x += x * this.speedMultiplier;
+      this.mesh.position.y += y * this.speedMultiplier;
+      this.mesh.position.z += z * this.speedMultiplier;
 
       const direction = new THREE.Vector3(x, 0, z);
       if (direction.length() > 0) {
@@ -49,18 +51,28 @@ export default class Player {
   }
 
   pickUpObject(object) {
-    if (!this.heldObject && object.isNear(this.collisionBox)) {
+    if (!this.actionInProgress && !this.heldObject && object.isNear(this.collisionBox)) {
+      this.actionInProgress = true; // Bloquea nuevas acciones
       this.heldObject = object;
-      //object.hide();
+
+      setTimeout(() => {
+        this.actionInProgress = false; // Desbloquea acciones después de un tiempo
+      }, 200); // 200 ms de retraso para evitar conflictos
     }
   }
   
   dropObject() {
-    if (this.heldObject) {
+    if (!this.actionInProgress && this.heldObject) {
+      this.actionInProgress = true; // Bloquea nuevas acciones
+
       this.heldObject.mesh.position.copy(this.mesh.position); // Coloca el objeto en la posición del jugador
       this.heldObject.mesh.position.y = 2.5;
-      this.heldObject.updateCollisionBox()
+      this.heldObject.updateCollisionBox();
       this.heldObject = null;
+
+      setTimeout(() => {
+        this.actionInProgress = false; // Desbloquea acciones después de un tiempo
+      }, 200); // 200 ms de retraso para evitar conflictos
     }
   }
 
@@ -90,4 +102,6 @@ export default class Player {
       this.collisionBox.setFromObject(this.mesh);
     }
   }
+
+  
 }

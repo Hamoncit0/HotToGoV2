@@ -3,6 +3,7 @@ import { city, beach, minecraft } from "../scene/backgroundModels.js";
 import { setupLighting, setUpLightingBeach, setUpLightingMinecraft } from '../scene/lighting.js';
 import AudioManager from './AudioManager.js';
 import GameController from "./GameController.js";
+import { getHighscores, saveHighscore } from "../webServices/webService.js";
 
 import * as THREE from 'three';
 export class ScreenController {
@@ -21,6 +22,8 @@ export class ScreenController {
         this.mapSelected = 0; // 0: city, 1: beach
         this.difficulty = 0; // 0: normal, 1: hard
         this.gameController = gameController;
+        this.gameController.screenController = this;
+
         // PANTALLAS
         this.Screens = {
             MAIN: document.getElementById('game-ui'),
@@ -49,6 +52,7 @@ export class ScreenController {
             goBackPlayer: document.getElementById('go-back-player'),
             goBackMap: document.getElementById('go-back-map'),
             goBackUser: document.getElementById('go-back-username'),
+            goBackDifficulty: document.getElementById('go-back-difficulty'),
             continue: document.getElementById('resume-btn'),
             settings: document.getElementById('settings'),
             highscore: document.getElementById('highscore-btn'),
@@ -85,8 +89,9 @@ export class ScreenController {
         this.Buttons.continue.addEventListener('click', () => this.resumeGame());
         this.Buttons.end.addEventListener('click', () => this.goToScreen(this.Screens.MAIN));
         this.Buttons.goBackPlayer.addEventListener('click', () => this.goToScreen(this.Screens.MAIN));
-        this.Buttons.goBackMap.addEventListener('click', () => this.goToScreen(this.Screens.PLAYER));
+        this.Buttons.goBackMap.addEventListener('click', () => this.goToScreen(this.Screens.DIFFICULTY));
         this.Buttons.goBackUser.addEventListener('click', () => this.goToScreen(this.Screens.MAP));
+        this.Buttons.goBackDifficulty.addEventListener('click', () => this.goToScreen(this.Screens.PLAYER));
         this.Buttons.settings.addEventListener('click', () => this.goToScreen(this.Screens.SETTINGS));
 
         window.addEventListener('keydown', (event) => this.handleKeydown(event));
@@ -119,12 +124,16 @@ export class ScreenController {
         this.mapSelected = map;
 
         this.camera.updateProjectionMatrix(); 
-
-        if (this.playerModeSelected === 0) this.startGame();
-        else this.goToScreen(this.Screens.USERNAME);
+        if( document.getElementById('idNombreJugador').value == ''){
+            this.goToScreen(this.Screens.USERNAME);
+        }
+        else {
+            this.startGame();
+        }
     }
 
     startGame() {
+        this.gameController.player.name = document.getElementById('idNombreJugador').value;
         this.isGameRunning = true;
         this.gameController.isPlaying = true;
         this.goToScreen(this.Screens.GAME);
@@ -160,12 +169,14 @@ export class ScreenController {
 
     pauseGame() {
         this.isGamePaused = true;
+        this.gameController.isPlaying = false;
         this.clock.stop();
         this.goToScreen(this.Screens.PAUSE);
     }
 
     resumeGame() {
         this.isGamePaused = false;
+        this.gameController.isPlaying = true;
         this.goToScreen(this.Screens.GAME);
         this.renderer.setSize(this.Screens.GAME.clientWidth, this.Screens.GAME.clientHeight);
         this.clock.start();
@@ -176,8 +187,32 @@ export class ScreenController {
         this.isGameRunning = false;
         this.isGamePaused = false;
         this.clock.stop();
-        this.Screens.PAUSE.setAttribute('hidden', true);
-        this.Screens.GAMEOVER.style.display = 'block';
-        this.Screens.GAME.setAttribute('hidden', true);
+        this.goToScreen(this.Screens.GAMEOVER);
+
+         // Obtener el nombre del jugador actual y su puntuación
+        const playerName = this.gameController.player.name;
+        const playerScore = this.gameController.points; 
+
+        saveHighscore(playerName, playerScore)
+        .then(() => {
+            console.log('Highscore guardado correctamente');
+            
+            // Obtener el top 5 de highscores y mostrarlos
+            return getHighscores();
+        })
+        .then((highscores)=>{
+            console.log('Top 5 Highscores:', highscores);
+            const highscoreList = document.getElementById('highscore-list'); // Asegúrate de tener este elemento en tu HTML
+            highscoreList.innerHTML = '';
+
+            highscores.forEach((score, index) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${score.name}: ${score.score}`;
+                highscoreList.appendChild(listItem);
+            });
+        })
+        .catch((error) => {
+            console.error('Error al manejar los high scores:', error);
+        });
     }
 }

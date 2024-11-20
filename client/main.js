@@ -6,6 +6,7 @@ import Player from './src/clases/Player.js'
 import {ScreenController} from './src/clases/ScreenController.js';
 import GameController from './src/clases/GameController.js';
 import Rat from './src/clases/Rat.js'
+
 //import Item from './src/clases/Item.js';
 import Dispenser from './src/clases/Dispenser.js';
 
@@ -41,7 +42,7 @@ setInterval(() => {
   if (gameController.isPlaying) {
       gameController.generateOrder();
   }
-}, 10000);
+}, gameController.orderFrequency);
 // Ajuste de ventana
 window.addEventListener('resize', () => {
     const width = container.clientWidth;
@@ -61,49 +62,98 @@ document.addEventListener('keyup', (event) => {
 let colisionado = false;
 let collisionCooldown = 10000
 
+// Crear un array para los dispensers
+const dispensers = [];
 
-const dispenser = new Dispenser(scene, {x: -4, y: 2, z: -6}, camera, 'Pizza');
-const dispenserLasagna = new Dispenser(scene, {x: -2, y: 2, z: -6}, camera, 'Risoto');
-const rat = new Rat(scene, {x: -2, y: 2, z: -3})
+// Agregar dispensers al array
+dispensers.push(new Dispenser(scene, { x: -4, y: 2, z: -6 }, camera, 'Pizza'));
+dispensers.push(new Dispenser(scene, { x: -2, y: 2, z: -6 }, camera, 'Risoto'));
+dispensers.push(new Dispenser(scene, { x: 0, y: 2, z: -6 }, camera, 'Lasagna'));
+dispensers.push(new Dispenser(scene, { x: 2, y: 2, z: -6 }, camera, 'Agua'));
+// Agrega los power-ups a un array global o del controlador
+// Crear el jugador y el tag de nombre
+const playerNameTag = createPlayerNameTag(localPlayer);
 
 function animate(isGameRunning, isGamePaused) {
-
 
     if (!isGameRunning || isGamePaused) return;
 
     requestAnimationFrame(animate);
     const deltaTime = clock.getDelta();
 
-     localPlayer.update(deltaTime);
 
      if (keyboard['w'] || keyboard['W']) localPlayer.move(0, 0, -speed);
      if (keyboard['s'] || keyboard['S']) localPlayer.move(0, 0, speed);
      if (keyboard['a'] || keyboard['A']) localPlayer.move(-speed, 0, 0);
      if (keyboard['d'] || keyboard['D']) localPlayer.move(speed, 0, 0);
 
-     scene.children.forEach((object) => {
-      if (object.collisionBox && checkCollision(localPlayer, object)) {
-          localPlayer.revertPosition()
-      }
+    scene.children.forEach((object) => {
+        if (object.collisionBox && checkCollision(localPlayer, object)) {
+            localPlayer.revertPosition()
+        }
     });
 
-	window.addEventListener('keyup', (event) => {
-		if (event.key === 'f' && dispenserLasagna.canDispense && dispenserLasagna.isNear(localPlayer)) { // Presiona "f" para generar una pizza
-		  dispenserLasagna.dispenseItem();
-		} else if (event.key === 'e' && !localPlayer.heldObject) { // Presiona "e" para recoger la pizza más cercana
-		  dispenserLasagna.items.forEach(pizza => localPlayer.pickUpObject(pizza));
-		}
-    else if(event.key === 'e' && localPlayer.heldObject){
-      localPlayer.dropObject();
-    }
-	  });
+	// Interacción con dispensers al presionar teclas
+    window.addEventListener('keyup', (event) => {
+      dispensers.forEach((dispenser) => {
+         if (event.key === 'f' && dispenser.canDispense && dispenser.isNear(localPlayer)) {
+                dispenser.dispenseItem(); // Genera un ítem del dispenser
+            } else if (event.key === 'e' && !localPlayer.heldObject) {
+                dispenser.items.forEach((item) => localPlayer.pickUpObject(item));
+            } else if (event.key === 'e' && localPlayer.heldObject) {
+                localPlayer.dropObject();
+          }
+      });
+      if(event.key == 'j'){
+        console.log(localPlayer.mesh.position)
+      }
+  
+    });
+
+    // Actualiza la posición del tag del nombre
+    updatePlayerNameTag(playerNameTag, localPlayer, camera);
+
+    // Actualizar cada dispenser
+    dispensers.forEach((dispenser) => dispenser.update());
+
+    localPlayer.update(deltaTime);
 
     gameController.update();
-    dispenserLasagna.update();
-    rat.update(deltaTime);
+
     renderer.render(scene, camera);
 }
 
 function checkCollision(player1, object) {
   return player1.collisionBox.intersectsBox(object.collisionBox);
+}
+
+
+function createPlayerNameTag(player) {
+  // Crea un elemento div para el nombre
+  const nameTag = document.createElement('div');
+  nameTag.textContent = player.name;
+  nameTag.style.position = 'absolute';
+  nameTag.style.color = 'black';
+  nameTag.style.fontSize = '14px';
+  nameTag.style.textAlign = 'center';
+
+  // Añádelo al contenedor de nombres
+  document.getElementById('player-names-container').appendChild(nameTag);
+
+  return nameTag;
+}
+
+function updatePlayerNameTag(nameTag, player, camera) {
+  nameTag.textContent = player.name;
+  // Proyecta la posición 3D a coordenadas de pantalla
+  const vector = new THREE.Vector3(player.mesh.position.x - 0.05 , player.mesh.position.y + 2.22, player.mesh.position.z); // +2 para colocarlo encima
+  vector.project(camera);
+
+  // Convierte las coordenadas normalizadas a pixeles
+  const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+  const y = -(vector.y * 0.5 - 0.5) * window.innerHeight;
+
+  // Actualiza la posición del div
+  nameTag.style.left = `${x}px`;
+  nameTag.style.top = `${y}px`;
 }

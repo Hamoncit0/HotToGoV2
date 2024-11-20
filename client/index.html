@@ -49,6 +49,8 @@
         </div>
         <h4 id="score">Score: 0</h4>
         <h4 id="time">Time: 0</h4>
+        <div id="player-names-container" style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 10;"></div>
+
        </div>
     </div>
     <!-- Menu principal -->
@@ -61,6 +63,11 @@
                 <button  id="settings" class="btn btn-primary settings-btn d-flex align-items-center justify-content-center"><i style="font-size: 3rem;" class="bi bi-gear-fill"></i></button>
                 <button  id="highscore-btn" class="btn btn-primary settings-btn d-flex align-items-center justify-content-center"><i style="font-size: 3rem;" class="bi bi-building-fill-up"></i></button>
             </div>
+            
+            <fb:login-button 
+            scope="public_profile,email"
+            onlogin="checkLoginState();">
+            </fb:login-button>
         </div>
     </div>
     <!-- multiplayer or singleplayer -->
@@ -114,13 +121,7 @@
                 </div>
                 <div class="highscores">
                     <h3>Highscores</h3>
-                    <ol type="1">
-                        <li>Player 1</li>
-                        <li>Player 2</li>
-                        <li>Player 3</li>
-                        <li>Player 4</li>
-                        <li>Player 5</li>
-                    </ol>
+                    <ol type="1" id="highscore-list"></ol>
                 </div>
             </div>
         </div>
@@ -173,5 +174,6 @@
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script> 
     <script type="module" src="./main.js">
     </script>
+    <script src="/client/Facebook.js"></script>
 </body>
 </html>

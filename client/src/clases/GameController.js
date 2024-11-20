@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
-
+import PowerUp from './PowerUp.js';
 export default class GameController {
     constructor(scene, player) {
         this.scene = scene;
@@ -9,25 +9,103 @@ export default class GameController {
 
         this.orders = []; // Array para guardar órdenes
         this.points = 0; // Puntuación inicial
-        this.timeRemaining = 300; // Tiempo en segundos
+        this.timeRemaining = 10; // Tiempo en segundos
         this.deliveryZones = []; // Zonas de entrega
+        this.screenController = null;
+
+        //Variables que controlan la dificultad
+        this.orderFrequency = 10000;
+        this.orderMaxTime = 30;
+        this.maxOrderCapacity = 4;
 
         this.clock = new THREE.Clock();
         this.isPlaying = false;
+        this.isGameOver = false;
 
         // Referencias a elementos de la interfaz
         this.ordersContainer = document.querySelector('.ordenes');
         this.scoreElement = document.getElementById('score');
         this.timeElement = document.getElementById('time');
 
+        this.powerUps = [];
+        this.spawnPowerUpsRandomly();
+
         // Intervalo para decrementar el tiempo
         setInterval(() => {
             if (this.isPlaying && this.timeRemaining > 0) {
                 this.timeRemaining--;
                 this.updateTimeDisplay();
+    
+                // Verificar fin del juego
+                if (this.timeRemaining <= 0) {
+                    this.screenController.endGame();
+                    this.endGame();
+                }
             }
         }, 1000);
     } 
+
+    endGame() {
+        this.isPlaying = false;
+        this.isGameOver = true; // Marca el juego como terminado
+        console.log(`Juego terminado. Puntuación final: ${this.points}`);
+        // Aquí puedes agregar lógica adicional, como mostrar un mensaje en pantalla
+        alert(`Fin del juego. Puntuación final: ${this.points}`);
+    }
+    
+    // Función para generar posiciones aleatorias dentro de un rango
+    getRandomPosition(min, max) {
+        console.log('generando posicion');
+        return new THREE.Vector3(
+            Math.random() * (max.x - min.x) + min.x,
+            Math.random() * (max.y - min.y) + min.y,
+            Math.random() * (max.z - min.z) + min.z
+        );
+    }
+    // Generar power-ups aleatoriamente en el rango especificado
+    spawnPowerUpsRandomly() {
+        console.log('Iniciando generación aleatoria de PowerUps');
+        // Define el rango para la posición de los PowerUps
+        const minPosition = new THREE.Vector3(3, 2, -2);
+        const maxPosition = new THREE.Vector3(-6, 2, -6);
+    
+        // Define el rango para el tiempo (en milisegundos)
+        const minTime = 5000; // 5 segundos
+        const maxTime = 15000; // 15 segundos
+    
+        // Función para generar PowerUps y programar el siguiente
+        const spawnNext = () => {
+            // Solo generar PowerUps si el juego está en progreso
+            if (!this.isPlaying) spawnNext;
+    
+            // Verificar si ya hay 2 PowerUps en el mapa
+            if (this.powerUps.length >= 2) {
+                console.log('Se alcanzó el límite de PowerUps en el mapa');
+            } else {
+                // Generar un PowerUp aleatorio
+                const powerUpTypes = [
+                    { modelPath: './src/models/power-ups/monster', effect: 'speed' },
+                    { modelPath: './src/models/power-ups/timer', effect: 'time' },
+                    { modelPath: './src/models/power-ups/coin', effect: 'points' }
+                ];
+                const randomType = powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)];
+                const randomPosition = this.getRandomPosition(minPosition, maxPosition);
+    
+                const powerUp = new PowerUp(this.scene, randomType.modelPath, randomPosition, randomType.effect);
+                this.powerUps.push(powerUp);
+    
+                console.log(`PowerUp generado: ${randomType.effect} en posición`, randomPosition);
+            }
+    
+            // Programar el siguiente intento de generación después de un tiempo aleatorio
+            const nextTime = Math.random() * (maxTime - minTime) + minTime;
+            setTimeout(spawnNext, nextTime);
+        };
+    
+        // Iniciar la primera generación
+        spawnNext();
+    }
+    
     
     updateTimeDisplay() {
         const minutes = Math.floor(this.timeRemaining / 60);
@@ -46,14 +124,14 @@ export default class GameController {
             const orderElement = document.createElement('div');
             orderElement.classList.add('orden');
             let color ='#00FF00';
-            if(order.timeRemaining>= 21){
+            if(order.timeRemaining>= (this.orderMaxTime * .7)){
                 color ='#00FF00';
 
             }
-            else if(order.timeRemaining >= 15){
+            else if(order.timeRemaining >= (this.orderMaxTime * .5)){
                 color ='#FFFF00';
             }
-            else if(order.timeRemaining >= 10){
+            else if(order.timeRemaining >= (this.orderMaxTime * .3)){
                 color = '#FF7700';
             }
             else{
@@ -65,7 +143,7 @@ export default class GameController {
                     <img src="./imagenes/${order.item.toLowerCase()}.png" alt="${order.item}">
                     <h3>${order.item}</h3>
                 </div>
-                <div class="orden-timeleft" style="width: ${order.timeRemaining * 3.3}%; background-color: ${color}; "></div>
+                <div class="orden-timeleft" style="width: ${(order.timeRemaining * 100) / (this.orderMaxTime)}%; background-color: ${color}; "></div>
             `;
 
             this.ordersContainer.appendChild(orderElement);
@@ -105,7 +183,7 @@ export default class GameController {
 
         const newOrder = {
             item: randomItem,
-            timeRemaining: 30, // Tiempo para entregar la orden en segundos
+            timeRemaining: this.orderMaxTime, // Tiempo para entregar la orden en segundos
         };
 
         this.orders.push(newOrder);
@@ -165,10 +243,12 @@ export default class GameController {
             }
         });
 
-        // Fin del juego
-        if (this.timeRemaining <= 0) {
-            this.isPlaying = false;
-            console.log(`Juego terminado. Puntuación final: ${this.points}`);
-        }
+        // Verificar colisiones con PowerUps
+        this.powerUps.forEach((powerUp, index) => {
+            if (powerUp.isNear(this.player.collisionBox)) {
+            powerUp.applyEffect(this.player, this);
+            this.powerUps.splice(index, 1); // Eliminar el power-up del array
+            }
+        });
     }
 }
