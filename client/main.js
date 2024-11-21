@@ -57,6 +57,7 @@ window.addEventListener('resize', () => {
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
 });
+
 const speed = 0.3;
 const keyboard = {};
 document.addEventListener('keydown', (event) => {
@@ -84,26 +85,93 @@ const playerNameTag = createPlayerNameTag(localPlayer);
 
 //socket.io
 
-socket.on('start', (name) => {
-  console.log('Jugador conectado:', name);
-  if (name !== player1Name && screenController.isGameRunning) {
-    player2Name = name;
+// socket.on('start', (name) => {
+//   console.log('Jugador conectado:', name);
+//   if (name !== localPlayer.name && screenController.isGameRunning && screenController.playerModeSelected == 1) {
+//     player2Name = name;
 
-    // Crea un nuevo jugador remoto
-    const remotePlayer = new Player(scene, './src/models/players/player_2.gltf', { x: 2, y: 2, z: -2 });
-    remotePlayer.name = name;
-    remotePlayers[name] = remotePlayer;
+//     // Crea un nuevo jugador remoto
+//     const remotePlayer = new Player(scene, './src/models/players/player_2.gltf', { x: 2, y: 2, z: -2 });
+//     remotePlayer.name = name;
+//     remotePlayers[name] = remotePlayer;
 
-    console.log(`Jugador remoto ${name} añadido`);
+//     console.log(`Jugador remoto ${name} añadido`);
+//   }
+// });
+var isHost = false;
+var hostInterval;
+function startHostResponsibilities(roomState) {
+  // Inicializar datos si es necesario
+  gameController.timeRemaining = roomState?.timeRemaining || 120;
+
+  // Empezar a manejar el tiempo de la partida
+  hostInterval = setInterval(() => {
+    gameController.timeRemaining -= 1;
+
+    // Enviar actualizaciones al servidor cada segundo
+    this.socket.emit('hostUpdate', screenController.room, { timeRemaining: gameController.timeRemaining });
+
+    if (gameController.timeRemaining <= 0) {
+      clearInterval(hostInterval);
+      console.log('¡La partida ha terminado!');
+    }
+  }, 1000);
+}
+socket.on('gameUpdate', (data) => {
+  if (data.timeRemaining !== undefined) {
+    gameController.timeRemaining = data.timeRemaining;
   }
 });
 
+socket.on('newHost', () => {
+  isHost = true;
+  console.log('¡Ahora soy el nuevo host!');
+  startHostResponsibilities();
+});
+
+socket.on('roomInit', (roomState) => {
+  const { players, objects } = roomState;
+  if (data.isHost) {
+    isHost = true; // Bandera para verificar si el jugador es host
+    startHostResponsibilities(data.roomState);
+  }
+  // Renderizar jugadores
+  Object.entries(players).forEach(([id, player]) => {
+    if (player.name !== localPlayer.name) {
+      player2Name = player.name;
+    
+      // Crea un nuevo jugador remoto
+      const remotePlayer = new Player(scene, './src/models/players/player_2.gltf', { x: 2, y: 2, z: -2 });
+      remotePlayer.name = player.name;
+      remotePlayers[player.name] = remotePlayer;
+  
+      console.log(`Jugador remoto ${player.name} añadido`);
+    }
+  });
+
+  // Renderizar objetos
+  objects.forEach((object) => this.addObjectToScene(object));
+});
+
+// Nuevo jugador en la sala
+socket.on('newPlayer', (data) => {
+  if (data.player.name !== localPlayer.name && screenController.isGameRunning && screenController.playerModeSelected == 1) {
+        player2Name = data.player.name;
+    
+        // Crea un nuevo jugador remoto
+        const remotePlayer = new Player(scene, './src/models/players/player_2.gltf', { x: 2, y: 2, z: -2 });
+        remotePlayer.name = data.player.name;
+        remotePlayers[data.player.name] = remotePlayer;
+    
+        console.log(`Jugador remoto ${data.player.name} añadido`);
+  }
+});
 
 // Evento para actualizar la posición de jugadores remotos
 socket.on('position', (position, name) => {
   if (remotePlayers[name]) {
     remotePlayers[name].mesh.position.set(position.x, position.y, position.z);
-    console.log(`Posición de ${name} actualizada:`, position);
+    //console.log(`Posición de ${name} actualizada:`, position);
   }
 });
 
@@ -119,7 +187,7 @@ socket.on('new_player', (name) => {
 
 setInterval(() => {
   if (localPlayer && gameController.isPlaying) {
-    console.log(localPlayer.name)
+    //console.log(localPlayer.name)
     socket.emit('position', localPlayer.mesh.position, localPlayer.name);
   }
 }, 100); // 10 veces por segundo

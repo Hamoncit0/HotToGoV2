@@ -89,9 +89,106 @@ app.post('/api/highscores', (req, res) => {
 
 
 const players=[];
+const rooms=[];
+const objects = [];
 
 io.on('connection', (socket) => {
-  console.log('a user connected');
+  console.log('Jugador conectado:', socket.id);
+
+  socket.on('joinRoom', (roomName, playerData) => {
+    if (!rooms[roomName]) {
+      // Crear la sala si no existe
+      rooms[roomName] = {
+        players: {},
+        objects: [],
+        host: socket.id, // El primer jugador será el host
+        timeRemaining: 120,
+      };
+    }else if (!rooms[roomName].host) {
+      // Asignar host si no hay uno (fallback)
+      rooms[roomName].host = socket.id;
+    }
+
+
+    // Agregar al jugador a la sala
+    rooms[roomName].players[socket.id] = {
+      name: playerData.name,
+      position: playerData.position || { x: 0, y: 0, z: 0 },
+      score: 0,
+    };
+
+    socket.join(roomName);
+
+    // Enviar al jugador el estado inicial de la sala
+    //socket.emit('roomInit', rooms[roomName]);
+    socket.emit('roomInit', {
+      roomState: rooms[roomName],
+      isHost: socket.id === rooms[roomName].host, // Informar si es el host
+    });
+
+    // Avisar a los demás en la sala que un nuevo jugador se unió
+    socket.to(roomName).emit('newPlayer', {
+      id: socket.id,
+      player: rooms[roomName].players[socket.id],
+    });
+
+    console.log(`Jugador ${playerData.name} se unió a la sala: ${roomName}`);
+  });
+
+   // Cuando el host envía datos actualizados
+  socket.on('hostUpdate', (roomName, updateData) => {
+    const room = rooms[roomName];
+    if (room && socket.id === room.host) {
+      // Actualizar datos en la sala
+      if (updateData.timeRemaining !== undefined) {
+        room.timeRemaining = updateData.timeRemaining;
+      }
+
+      // Reenviar los datos actualizados a todos los jugadores
+      socket.to(roomName).emit('gameUpdate', updateData);
+    }
+  });
+
+
+  // Actualizar posición del jugador
+  socket.on('updatePosition', (roomName, position) => {
+    if (rooms[roomName] && rooms[roomName].players[socket.id]) {
+      rooms[roomName].players[socket.id].position = position;
+
+      // Emitir actualización solo a los jugadores de la sala
+      socket.to(roomName).emit('updatePlayer', { id: socket.id, position });
+    }
+  });
+
+  // Desconexión del jugador
+  socket.on('disconnect', () => {
+    for (const roomName in rooms) {
+      const room = rooms[roomName];
+
+      if (room.players[socket.id]) {
+        // Si el host se desconecta, asignar nuevo host
+        if (room.host === socket.id) {
+          const remainingPlayers = Object.keys(room.players).filter(
+            (id) => id !== socket.id
+          );
+          room.host = remainingPlayers[0] || null;
+          if (room.host) {
+            io.to(room.host).emit('newHost'); // Informar al nuevo host
+          }
+        }
+
+        // Eliminar al jugador de la sala
+        delete room.players[socket.id];
+        io.to(roomName).emit('playerLeft', { id: socket.id });
+
+        // Eliminar la sala si ya no tiene jugadores
+        if (Object.keys(room.players).length === 0) {
+          delete rooms[roomName];
+        }
+        break;
+      }
+    }
+  });
 
   socket.on('start', (name) => {
     console.log('start name: ' + name);
@@ -117,7 +214,7 @@ io.on('connection', (socket) => {
       player.x = position.x;
       player.y = position.y;
       player.z = position.z;
-      console.log(`Actualización ${name}: ${player.x}, ${player.y}, ${player.z}`);
+      //console.log(`Actualización ${name}: ${player.x}, ${player.y}, ${player.z}`);
   
       // Emitir solo la actualización del jugador correspondiente
       io.emit('position', player, name);
