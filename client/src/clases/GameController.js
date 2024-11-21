@@ -3,13 +3,13 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 import PowerUp from './PowerUp.js';
 export default class GameController {
-    constructor(scene, player) {
+    constructor(scene, player, socket) {
         this.scene = scene;
         this.player = player;
 
         this.orders = []; // Array para guardar órdenes
         this.points = 0; // Puntuación inicial
-        this.timeRemaining = 10; // Tiempo en segundos
+        this.timeRemaining = 120; // Tiempo en segundos
         this.deliveryZones = []; // Zonas de entrega
         this.screenController = null;
 
@@ -21,6 +21,8 @@ export default class GameController {
         this.clock = new THREE.Clock();
         this.isPlaying = false;
         this.isGameOver = false;
+        this.socket = socket;
+
 
         // Referencias a elementos de la interfaz
         this.ordersContainer = document.querySelector('.ordenes');

@@ -4,7 +4,6 @@ const { join } = require('node:path');
 const { Server } = require('socket.io');
 const mysql = require('mysql2');
 
-const players=[];
 
 const app = express();
 const server = createServer(app);
@@ -89,30 +88,31 @@ app.post('/api/highscores', (req, res) => {
 });
 
 
+const players=[];
 
 io.on('connection', (socket) => {
   console.log('a user connected');
 
   socket.on('start', (name) => {
-    console.log('start name: '+name);
+    console.log('start name: ' + name);
 
     players.push( {
-    name:name,
-    x:2,
-    y:2,
-    z:-2
-  });
-  
-  for(let item of players){
+      name:name,
+      x:2,
+      y:2,
+      z:-2
+    });
     
-   io.emit('start',item.name);
+    for(let item of players){
+      
+    io.emit('start',item.name);
 
-  }
+    }
 
   });
 
   socket.on('position', (position, name) => {
-    const player = players.find((p) => p.name === name);
+    const player = players.find((p) => p.name == name);
     if (player) {
       player.x = position.x;
       player.y = position.y;

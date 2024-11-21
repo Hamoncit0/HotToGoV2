@@ -7,7 +7,7 @@ import { getHighscores, saveHighscore } from "../webServices/webService.js";
 
 import * as THREE from 'three';
 export class ScreenController {
-    constructor(container, renderer, clock, animate, scene, camera, gameController) {
+    constructor(container, renderer, clock, animate, scene, camera, gameController, socket) {
         this.container = container;
         this.renderer = renderer;
         this.clock = clock;
@@ -23,6 +23,7 @@ export class ScreenController {
         this.difficulty = 0; // 0: normal, 1: hard
         this.gameController = gameController;
         this.gameController.screenController = this;
+        this.socket = socket;
 
         // PANTALLAS
         this.Screens = {
@@ -153,6 +154,10 @@ export class ScreenController {
             this.startGame();
         }
     }
+    iniciarConexion() {
+      const player1Name = document.getElementById("idNombreJugador").value;
+      this.socket.emit('start', player1Name);
+    }
 
     startGame() {
         this.gameController.player.name = document.getElementById('idNombreJugador').value;
@@ -160,6 +165,10 @@ export class ScreenController {
         this.gameController.isPlaying = true;
         this.goToScreen(this.Screens.GAME);
         this.renderer.setSize(this.Screens.GAME.clientWidth, this.Screens.GAME.clientHeight);
+
+        if(this.playerModeSelected == 1)
+        this.iniciarConexion();
+
 
         if (this.mapSelected === 0){ 
             city(this.scene);
