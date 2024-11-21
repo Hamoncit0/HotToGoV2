@@ -176,7 +176,7 @@ export class ScreenController {
         this.socket.emit('joinRoom', this.room, {
             name: player1Name,
             position: { x: 2, y: 2, z: -2 },
-          });
+        });
     }
     
 

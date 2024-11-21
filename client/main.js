@@ -98,18 +98,54 @@ const playerNameTag = createPlayerNameTag(localPlayer);
 //     console.log(`Jugador remoto ${name} añadido`);
 //   }
 // });
-var isHost = false;
+var isHostVar = false;
 var hostInterval;
-function startHostResponsibilities(roomState) {
-  // Inicializar datos si es necesario
-  gameController.timeRemaining = roomState?.timeRemaining || 120;
 
-  // Empezar a manejar el tiempo de la partida
+socket.on('roomInit', (data) => {
+  var { roomState, isHost } = data;
+  
+  // Configuración inicial del tiempo
+  gameController.timeRemaining = roomState.timeRemaining || 120;
+
+  if (isHost) {
+    isHostVar = true; // Bandera para el host
+    startHostResponsibilities(roomState);
+  }
+
+  // Renderizar jugadores existentes
+  Object.entries(roomState.players).forEach(([id, player]) => {
+    if (player.name !== localPlayer.name) {
+      player2Name = player.name;
+
+      // Crea un nuevo jugador remoto
+      const remotePlayer = new Player(scene, './src/models/players/player_2.gltf', { x: 2, y: 2, z: -2 });
+      remotePlayer.name = player.name;
+      remotePlayers[player.name] = remotePlayer;
+
+      console.log(`Jugador remoto ${player.name} añadido`);
+    }
+  });
+
+  // Renderizar objetos si es necesario
+  roomState.objects.forEach((object) => gameController.addObjectToScene(object));
+});
+
+// Manejo de actualizaciones de tiempo desde el servidor
+socket.on('gameUpdate', (data) => {
+  if (data.timeRemaining !== undefined) {
+    gameController.timeRemaining = data.timeRemaining;
+  }
+});
+
+function startHostResponsibilities(roomState) {
+  console.log('soy responsable :D')
+  gameController.timeRemaining = roomState.timeRemaining || 120;
+
   hostInterval = setInterval(() => {
     gameController.timeRemaining -= 1;
 
-    // Enviar actualizaciones al servidor cada segundo
-    this.socket.emit('hostUpdate', screenController.room, { timeRemaining: gameController.timeRemaining });
+    // Enviar datos al servidor
+    socket.emit('hostUpdate', screenController.room, { timeRemaining: gameController.timeRemaining });
 
     if (gameController.timeRemaining <= 0) {
       clearInterval(hostInterval);
@@ -117,41 +153,14 @@ function startHostResponsibilities(roomState) {
     }
   }, 1000);
 }
-socket.on('gameUpdate', (data) => {
-  if (data.timeRemaining !== undefined) {
-    gameController.timeRemaining = data.timeRemaining;
-  }
-});
+
 
 socket.on('newHost', () => {
-  isHost = true;
+  isHostVar = true;
   console.log('¡Ahora soy el nuevo host!');
   startHostResponsibilities();
 });
 
-socket.on('roomInit', (roomState) => {
-  const { players, objects } = roomState;
-  if (data.isHost) {
-    isHost = true; // Bandera para verificar si el jugador es host
-    startHostResponsibilities(data.roomState);
-  }
-  // Renderizar jugadores
-  Object.entries(players).forEach(([id, player]) => {
-    if (player.name !== localPlayer.name) {
-      player2Name = player.name;
-    
-      // Crea un nuevo jugador remoto
-      const remotePlayer = new Player(scene, './src/models/players/player_2.gltf', { x: 2, y: 2, z: -2 });
-      remotePlayer.name = player.name;
-      remotePlayers[player.name] = remotePlayer;
-  
-      console.log(`Jugador remoto ${player.name} añadido`);
-    }
-  });
-
-  // Renderizar objetos
-  objects.forEach((object) => this.addObjectToScene(object));
-});
 
 // Nuevo jugador en la sala
 socket.on('newPlayer', (data) => {

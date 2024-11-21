@@ -136,18 +136,19 @@ io.on('connection', (socket) => {
   });
 
    // Cuando el host envía datos actualizados
-  socket.on('hostUpdate', (roomName, updateData) => {
+   socket.on('hostUpdate', (roomName, updateData) => {
     const room = rooms[roomName];
     if (room && socket.id === room.host) {
-      // Actualizar datos en la sala
+      // Actualizar el tiempo restante en el servidor
       if (updateData.timeRemaining !== undefined) {
         room.timeRemaining = updateData.timeRemaining;
       }
-
-      // Reenviar los datos actualizados a todos los jugadores
-      socket.to(roomName).emit('gameUpdate', updateData);
+  
+      // Enviar los datos a los demás jugadores
+      socket.to(roomName).emit('gameUpdate', { timeRemaining: room.timeRemaining });
     }
   });
+  
 
 
   // Actualizar posición del jugador

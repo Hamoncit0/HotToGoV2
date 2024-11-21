@@ -9,7 +9,7 @@ export default class GameController {
 
         this.orders = []; // Array para guardar órdenes
         this.points = 0; // Puntuación inicial
-        this.timeRemaining = 120; // Tiempo en segundos
+        this._timeRemaining = 120; // Tiempo en segundos
         this.deliveryZones = []; // Zonas de entrega
         this.screenController = null;
 
@@ -46,7 +46,19 @@ export default class GameController {
             }
         }, 1000);
     } 
+    get timeRemaining() {
+        return this._timeRemaining;
+    }
 
+    set timeRemaining(value) {
+        this._timeRemaining = value;
+        this.updateTimeDisplay(); // Llama a la función para actualizar la interfaz
+        if (this._timeRemaining <= 0 && this.isPlaying) {
+            this.screenController.endGame();
+            this.endGame();
+        }
+    }
+    
     endGame() {
         this.isPlaying = false;
         this.isGameOver = true; // Marca el juego como terminado
