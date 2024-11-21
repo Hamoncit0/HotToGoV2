@@ -91,9 +91,32 @@ app.post('/api/highscores', (req, res) => {
 const players=[];
 const rooms=[];
 const objects = [];
+let orders = [];
+let scores = {};
 
 io.on('connection', (socket) => {
   console.log('Jugador conectado:', socket.id);
+
+    // Enviar órdenes y puntuación iniciales al jugador
+  socket.emit('ordersUpdate', orders);
+  socket.emit('scoreUpdate', scores[socket.id] || 0);
+
+    // Escuchar actualizaciones de órdenes
+  socket.on('updateOrders', (updatedOrders) => {
+      orders = updatedOrders;
+      io.emit('ordersUpdate', orders); // Actualizar para todos los jugadores
+  });
+ 
+  socket.on('updateScore', (points) => {
+        scores[socket.id] = points;
+        io.emit('scoreUpdate', points); // Actualizar para todos los jugadores
+  });
+   // Manejar desconexión
+   socket.on('disconnect', () => {
+    console.log('Jugador desconectado:', socket.id);
+    delete scores[socket.id];
+  });
+
 
   socket.on('joinRoom', (roomName, playerData) => {
     if (!rooms[roomName]) {
@@ -165,6 +188,7 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     for (const roomName in rooms) {
       const room = rooms[roomName];
+      const playerName = room.players[socket.id].name; 
 
       if (room.players[socket.id]) {
         // Si el host se desconecta, asignar nuevo host
@@ -181,6 +205,7 @@ io.on('connection', (socket) => {
         // Eliminar al jugador de la sala
         delete room.players[socket.id];
         io.to(roomName).emit('playerLeft', { id: socket.id });
+        io.to(roomName).emit('playerDisconnected', { name: playerName });
 
         // Eliminar la sala si ya no tiene jugadores
         if (Object.keys(room.players).length === 0) {

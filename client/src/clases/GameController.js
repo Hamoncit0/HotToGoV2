@@ -32,6 +32,18 @@ export default class GameController {
         this.powerUps = [];
         this.spawnPowerUpsRandomly();
 
+         // Escuchar actualizaciones de órdenes desde el servidor
+        this.socket.on('ordersUpdate', (updatedOrders) => {
+            this.orders = updatedOrders;
+            this.updateOrdersDisplay();
+        });
+
+        // Escuchar actualización de puntuación
+        this.socket.on('scoreUpdate', (updatedPoints) => {
+            this.points = updatedPoints;
+            this.updateScoreDisplay();
+        });
+
         // Intervalo para decrementar el tiempo
         setInterval(() => {
             if (this.isPlaying && this.timeRemaining > 0) {
@@ -203,6 +215,9 @@ export default class GameController {
         this.orders.push(newOrder);
         this.updateOrdersDisplay();
 
+        // Emitir las órdenes actualizadas al servidor
+        this.socket.emit('updateOrders', this.orders);
+
         // Intervalo para actualizar el tiempo restante de la orden
         const orderIndex = this.orders.length - 1;
         const interval = setInterval(() => {
@@ -219,6 +234,10 @@ export default class GameController {
                 this.points -= 10; // Penalización por no entregar
                 this.updateScoreDisplay();
                 this.updateOrdersDisplay();
+
+                // Sincronizar cambios con el servidor
+                this.socket.emit('updateOrders', this.orders);
+                this.socket.emit('updateScore', this.points);
             } else {
                 this.updateOrdersDisplay();
             }
@@ -236,9 +255,16 @@ export default class GameController {
                 this.points += 10;
                 this.updateScoreDisplay();
                 this.updateOrdersDisplay();
+
+                 // Emitir actualizaciones al servidor
+                this.socket.emit('updateOrders', this.orders);
+                this.socket.emit('updateScore', this.points);
             } else {
                 this.points -= 5;
                 this.updateScoreDisplay();
+
+                // Emitir puntuación actualizada al servidor
+                this.socket.emit('updateScore', this.points);
             }
             this.player.heldObject.destroy();
             this.player.heldObject = null;
@@ -261,6 +287,7 @@ export default class GameController {
         this.powerUps.forEach((powerUp, index) => {
             if (powerUp.isNear(this.player.collisionBox)) {
             powerUp.applyEffect(this.player, this);
+            this.socket.emit('updateScore', this.points);
             this.powerUps.splice(index, 1); // Eliminar el power-up del array
             }
         });

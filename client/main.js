@@ -15,7 +15,6 @@ const socket = io();
 var player1Name = '';
 var player2Name = '';
 
-
 // Configuración básica
 const container = document.getElementById('threejs-container');
 const scene = new THREE.Scene();
@@ -121,6 +120,9 @@ socket.on('roomInit', (data) => {
       const remotePlayer = new Player(scene, './src/models/players/player_2.gltf', { x: 2, y: 2, z: -2 });
       remotePlayer.name = player.name;
       remotePlayers[player.name] = remotePlayer;
+      // Crear tag para el nombre del jugador remoto
+      remotePlayer.nameTag = createPlayerNameTag(remotePlayer);
+
 
       console.log(`Jugador remoto ${player.name} añadido`);
     }
@@ -171,8 +173,25 @@ socket.on('newPlayer', (data) => {
         const remotePlayer = new Player(scene, './src/models/players/player_2.gltf', { x: 2, y: 2, z: -2 });
         remotePlayer.name = data.player.name;
         remotePlayers[data.player.name] = remotePlayer;
-    
+
+        // Crear tag para el nombre del jugador remoto
+        remotePlayer.nameTag = createPlayerNameTag(remotePlayer);
+
         console.log(`Jugador remoto ${data.player.name} añadido`);
+  }
+});
+
+socket.on('playerDisconnected', (name) => {
+  if (remotePlayers[name]) {
+    // Elimina el tag del DOM
+    const nameTag = remotePlayers[name].nameTag;
+    if (nameTag && nameTag.parentNode) {
+      nameTag.parentNode.removeChild(nameTag);
+    }
+
+    // Elimina al jugador remoto del objeto
+    delete remotePlayers[name];
+    console.log(`Jugador remoto ${name} eliminado`);
   }
 });
 
@@ -228,6 +247,7 @@ function animate(isGameRunning, isGamePaused) {
     // Renderiza a los jugadores remotos
     Object.values(remotePlayers).forEach((remotePlayer) => {
       remotePlayer.update(deltaTime); // Si `Player` tiene lógica de animación
+      updatePlayerNameTag(remotePlayer.nameTag, remotePlayer, camera);
     });
 
 	// Interacción con dispensers al presionar teclas
