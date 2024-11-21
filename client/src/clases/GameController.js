@@ -6,13 +6,13 @@ import Rat from './Rat.js';
 
 
 export default class GameController {
-    constructor(scene, player) {
+    constructor(scene, player, socket) {
         this.scene = scene;
         this.player = player;
 
         this.orders = []; // Array para guardar órdenes
         this.points = 0; // Puntuación inicial
-        this.timeRemaining = 120; // Tiempo en segundos
+        this._timeRemaining = 120; // Tiempo en segundos
         this.deliveryZones = []; // Zonas de entrega
         this.screenController = null;
 
@@ -24,6 +24,8 @@ export default class GameController {
         this.clock = new THREE.Clock();
         this.isPlaying = false;
         this.isGameOver = false;
+        this.socket = socket;
+
 
         // Referencias a elementos de la interfaz
         this.ordersContainer = document.querySelector('.ordenes');
@@ -35,6 +37,17 @@ export default class GameController {
 
         this.rats = [];  // Guardar todas las ratas aquí
 
+         // Escuchar actualizaciones de órdenes desde el servidor
+        this.socket.on('ordersUpdate', (updatedOrders) => {
+            this.orders = updatedOrders;
+            this.updateOrdersDisplay();
+        });
+
+        // Escuchar actualización de puntuación
+        this.socket.on('scoreUpdate', (updatedPoints) => {
+            this.points = updatedPoints;
+            this.updateScoreDisplay();
+        });
 
         // Intervalo para decrementar el tiempo
         setInterval(() => {
@@ -50,6 +63,9 @@ export default class GameController {
             }
         }, 1000);
     } 
+    get timeRemaining() {
+        return this._timeRemaining;
+    }
 
     startspawnrat(){
 		// Verificar la dificultad y generar ratas solo si la dificultad es "Dificil"
@@ -72,6 +88,15 @@ export default class GameController {
     }
 
 
+    set timeRemaining(value) {
+        this._timeRemaining = value;
+        this.updateTimeDisplay(); // Llama a la función para actualizar la interfaz
+        if (this._timeRemaining <= 0 && this.isPlaying) {
+            this.screenController.endGame();
+            this.endGame();
+        }
+    }
+    
     endGame() {
         this.isPlaying = false;
         this.isGameOver = true; // Marca el juego como terminado
@@ -216,6 +241,9 @@ export default class GameController {
         this.orders.push(newOrder);
         this.updateOrdersDisplay();
 
+        // Emitir las órdenes actualizadas al servidor
+        this.socket.emit('updateOrders', this.orders);
+
         // Intervalo para actualizar el tiempo restante de la orden
         const orderIndex = this.orders.length - 1;
         const interval = setInterval(() => {
@@ -232,6 +260,10 @@ export default class GameController {
                 this.points -= 10; // Penalización por no entregar
                 this.updateScoreDisplay();
                 this.updateOrdersDisplay();
+
+                // Sincronizar cambios con el servidor
+                this.socket.emit('updateOrders', this.orders);
+                this.socket.emit('updateScore', this.points);
             } else {
                 this.updateOrdersDisplay();
             }
@@ -249,9 +281,16 @@ export default class GameController {
                 this.points += 10;
                 this.updateScoreDisplay();
                 this.updateOrdersDisplay();
+
+                 // Emitir actualizaciones al servidor
+                this.socket.emit('updateOrders', this.orders);
+                this.socket.emit('updateScore', this.points);
             } else {
                 this.points -= 5;
                 this.updateScoreDisplay();
+
+                // Emitir puntuación actualizada al servidor
+                this.socket.emit('updateScore', this.points);
             }
             this.player.heldObject.destroy();
             this.player.heldObject = null;
@@ -281,6 +320,7 @@ export default class GameController {
         this.powerUps.forEach((powerUp, index) => {
             if (powerUp.mesh && powerUp.isNear(this.player.collisionBox)) {
             powerUp.applyEffect(this.player, this);
+            this.socket.emit('updateScore', this.points);
             this.powerUps.splice(index, 1); // Eliminar el power-up del array
             }
         });

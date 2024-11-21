@@ -7,7 +7,7 @@ import { getHighscores, saveHighscore } from "../webServices/webService.js";
 
 import * as THREE from 'three';
 export class ScreenController {
-    constructor(container, renderer, clock, animate, scene, camera, gameController) {
+    constructor(container, renderer, clock, animate, scene, camera, gameController, socket) {
         this.container = container;
         this.renderer = renderer;
         this.clock = clock;
@@ -23,6 +23,8 @@ export class ScreenController {
         this.difficulty = 0; // 0: normal, 1: hard
         this.gameController = gameController;
         this.gameController.screenController = this;
+        this.socket = socket;
+        this.room= '';
 
         // PANTALLAS
         this.Screens = {
@@ -35,7 +37,8 @@ export class ScreenController {
             GAMEOVER: document.getElementById('game-over'),
             GAME: container,
             SETTINGS: document.getElementById('config-screen'),
-            HIGHSCORES: document.getElementById('highscores')
+            HIGHSCORES: document.getElementById('highscores'),
+            ROOM: document.getElementById('room-input')
         };
 
         // BOTONES
@@ -60,6 +63,8 @@ export class ScreenController {
             goBackEnd: document.getElementById('btn-go-back-end'),
             goBackSettings: document.getElementById('btn-go-back-settings'),
             goBackHighscores: document.getElementById('btn-go-back-highscores'),
+            joinRoom: document.getElementById('join-room-btn'),
+            goBackRoom: document.getElementById('go-back-room'),
         };
         this.audioManager.loadBackgroundMusic('./src/sounds/Spagonia (Day) - Sonic Unleashed [OST].mp3');
 
@@ -89,7 +94,13 @@ export class ScreenController {
         this.Buttons.city.addEventListener('click', () => this.selectMap(0));
         this.Buttons.beach.addEventListener('click', () => this.selectMap(1));
         this.Buttons.minecraft.addEventListener('click', () => this.selectMap(2));
-        this.Buttons.join.addEventListener('click', () => this.startGame());
+        this.Buttons.join.addEventListener('click', () => {
+            if(this.playerModeSelected == 1)
+            this.goToScreen(this.Screens.ROOM)
+            else if(this.playerModeSelected == 0)
+            this.startGame();
+        }
+        );
         this.Buttons.continue.addEventListener('click', () => this.resumeGame());
         this.Buttons.end.addEventListener('click', () => location.reload());
         this.Buttons.goBackPlayer.addEventListener('click', () => this.goToScreen(this.Screens.MAIN));
@@ -101,6 +112,8 @@ export class ScreenController {
         this.Buttons.goBackSettings.addEventListener('click', () => this.goToScreen(this.Screens.MAIN));
         this.Buttons.highscore.addEventListener('click', () => this.goToScreen(this.Screens.HIGHSCORES));
         this.Buttons.goBackHighscores.addEventListener('click', () => this.goToScreen(this.Screens.MAIN));
+        this.Buttons.joinRoom.addEventListener('click', () => this.startGame());
+        this.Buttons.goBackRoom.addEventListener('click', () => this.goToScreen(this.Screens.USERNAME));
 
         window.addEventListener('keydown', (event) => this.handleKeydown(event));
     }
@@ -153,6 +166,19 @@ export class ScreenController {
             this.startGame();
         }
     }
+    startConnection() {
+      const player1Name = document.getElementById("idNombreJugador").value;
+      this.socket.emit('start', player1Name);
+    }
+    joinRoom(){
+        const player1Name = document.getElementById("idNombreJugador").value;
+        this.room = document.getElementById("idRoom").value;
+        this.socket.emit('joinRoom', this.room, {
+            name: player1Name,
+            position: { x: 2, y: 2, z: -2 },
+        });
+    }
+    
 
     startGame() {
         this.gameController.player.name = document.getElementById('idNombreJugador').value;
@@ -160,6 +186,12 @@ export class ScreenController {
         this.gameController.isPlaying = true;
         this.goToScreen(this.Screens.GAME);
         this.renderer.setSize(this.Screens.GAME.clientWidth, this.Screens.GAME.clientHeight);
+
+        if(this.playerModeSelected == 1){
+         this.startConnection();
+            this.joinRoom();
+        }
+
 
         if (this.mapSelected === 0){ 
             city(this.scene);
