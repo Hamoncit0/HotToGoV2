@@ -23,6 +23,7 @@ export class ScreenController {
         this.difficulty = 0; // 0: normal, 1: hard
         this.gameController = gameController;
         this.gameController.screenController = this;
+        this.gameController.audioManager = this.audioManager;
         this.socket = socket;
         this.room= '';
 
@@ -70,6 +71,7 @@ export class ScreenController {
 
         // Cargar efecto de sonido para clics
         this.audioManager.loadSound('click', './src/sounds/ButtonPlate Click (Minecraft Sound) - Sound Effect for editing.mp3');
+        this.audioManager.loadSound('ratVisible', './src/sounds/concrete.mp3', 1);
 
         this.init();
     }

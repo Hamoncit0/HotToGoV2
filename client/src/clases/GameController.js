@@ -3,6 +3,7 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 import PowerUp from './PowerUp.js';
 import Rat from './Rat.js';
+import AudioManager from './AudioManager.js';
 
 
 export default class GameController {
@@ -20,7 +21,7 @@ export default class GameController {
         this.orderFrequency = 10000;
         this.orderMaxTime = 30;
         this.maxOrderCapacity = 4;
-
+        this.audioManager = null;
         this.clock = new THREE.Clock();
         this.isPlaying = false;
         this.isGameOver = false;
@@ -82,7 +83,7 @@ export default class GameController {
     // Generar una rata en una posición aleatoria
     spawnRat() {
         const randomPosition = this.getRandomPosition(new THREE.Vector3(-5, 2, -5), new THREE.Vector3(5, 2, -5));
-        const rat = new Rat(this.scene, randomPosition);
+        const rat = new Rat(this.scene, randomPosition, this.audioManager);
         this.rats.push(rat);
         console.log("Rata generada en:", randomPosition);
     }
