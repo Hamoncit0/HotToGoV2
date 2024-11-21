@@ -6,7 +6,7 @@ export default class Rat {
 	constructor(scene, initialPosition = { x: 0, y: 2, z: 0 }, audioManager) {
 		this.scene = scene;
 		this.speed = 0.05; // Velocidad para seguir al jugador
-		this.stunDuration = 1; // Tiempo durante el cual el jugador queda atónito
+		this.stunDuration = 2; // Tiempo durante el cual el jugador queda atónito
 		this.isSoundPlaying = false;
         this.audioManager = audioManager;
 
@@ -84,7 +84,7 @@ export default class Rat {
 					}
 				}
 			});
-			
+
 			if (this.isSoundPlaying) {
                 this.audioManager.stopSound('ratVisible');
                 this.isSoundPlaying = false;

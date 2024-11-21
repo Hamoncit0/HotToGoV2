@@ -35,6 +35,7 @@ export default class PowerUp {
       gameController.timeRemaining += 5; // Añade tiempo al juego
     } else if (this.effect === "speed") {
       player.speedMultiplier = 2; // Doble velocidad
+      gameController.removeAllRats();
       setTimeout(() => {
         player.speedMultiplier = 1; // Restaura la velocidad original
       }, this.duration * 1000);

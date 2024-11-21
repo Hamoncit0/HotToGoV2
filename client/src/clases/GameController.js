@@ -330,5 +330,14 @@ export default class GameController {
     checkCollision(player1, object) {
       return player1.collisionBox.intersectsBox(object.collisionBox);
     }
+    removeAllRats() {
+        this.rats.forEach((rat) => {
+           rat.destroy();
+        });
+    
+        // Limpia el array de ratas
+        this.rats = [];
+        console.log('Todas las ratas han sido eliminadas.');
+    }
     
 }
