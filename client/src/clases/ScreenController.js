@@ -56,6 +56,9 @@ export class ScreenController {
             goBackDifficulty: document.getElementById('go-back-difficulty'),
             continue: document.getElementById('resume-btn'),
             settings: document.getElementById('settings'),
+			settingsCheckbox1: document.getElementById('custom-checbox'),
+			settingsCheckbox2: document.getElementById('custom-checbox1'),
+			settingsCheckbox3: document.getElementById('custom-checbox2'),
             highscore: document.getElementById('highscore-btn'),
             goBackEnd: document.getElementById('btn-go-back-end'),
             goBackSettings: document.getElementById('btn-go-back-settings'),
@@ -98,6 +101,9 @@ export class ScreenController {
         this.Buttons.goBackDifficulty.addEventListener('click', () => this.goToScreen(this.Screens.PLAYER));
         this.Buttons.goBackEnd.addEventListener('click', () => location.reload());
         this.Buttons.settings.addEventListener('click', () => this.goToScreen(this.Screens.SETTINGS));
+		this.Buttons.settingsCheckbox1.addEventListener('click', () => this.resizeWindow(1));  // Full 
+		this.Buttons.settingsCheckbox2.addEventListener('click', () => this.resizeWindow(0.75));  // 75% 
+		this.Buttons.settingsCheckbox3.addEventListener('click', () => this.resizeWindow(1.5));  // 150% 
         this.Buttons.goBackSettings.addEventListener('click', () => this.goToScreen(this.Screens.MAIN));
         this.Buttons.highscore.addEventListener('click', () => this.goToScreen(this.Screens.HIGHSCORES));
         this.Buttons.goBackHighscores.addEventListener('click', () => this.goToScreen(this.Screens.MAIN));
@@ -131,6 +137,8 @@ export class ScreenController {
             })
         }
     }
+    
+	
 
     selectPlayerMode(mode) {
         this.playerModeSelected = mode;
@@ -154,6 +162,15 @@ export class ScreenController {
         }
     }
 
+	resizeWindow(size) {
+		
+		this.renderer.setSize(window.innerWidth * size, window.innerHeight * size);
+		
+		this.camera.aspect = window.innerWidth * size / window.innerHeight * size;
+		this.camera.updateProjectionMatrix();
+	}
+
+	
     startGame() {
         this.gameController.player.name = document.getElementById('idNombreJugador').value;
         this.isGameRunning = true;
