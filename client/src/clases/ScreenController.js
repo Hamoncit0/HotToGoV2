@@ -23,6 +23,7 @@ export class ScreenController {
         this.difficulty = 0; // 0: normal, 1: hard
         this.gameController = gameController;
         this.gameController.screenController = this;
+		this.isMuted = false;
 
         // PANTALLAS
         this.Screens = {
@@ -83,7 +84,7 @@ export class ScreenController {
                 this.audioManager.playSound('click');
             });
         });
-
+		
         this.Buttons.play.addEventListener('click', () => {this.goToScreen(this.Screens.PLAYER); });
         this.Buttons.singlePlayer.addEventListener('click', () => this.selectPlayerMode(0));
         this.Buttons.multiPlayer.addEventListener('click', () => this.selectPlayerMode(1));
@@ -103,7 +104,12 @@ export class ScreenController {
         this.Buttons.settings.addEventListener('click', () => this.goToScreen(this.Screens.SETTINGS));
 		this.Buttons.settingsCheckbox1.addEventListener('click', () => this.resizeWindow(1));  // Full 
 		this.Buttons.settingsCheckbox2.addEventListener('click', () => this.resizeWindow(0.75));  // 75% 
-		this.Buttons.settingsCheckbox3.addEventListener('click', () => this.resizeWindow(1.5));  // 150% 
+		this.Buttons.settingsCheckbox3.addEventListener('click', () => {
+			this.isMuted = !this.isMuted; // Alterna el estado entre silenciado y no silenciado
+			const volume = this.isMuted ? 0 : 0.3; // Cambia el volumen según el estado
+			this.audioManager.setBackgroundMusicVolume(volume);
+			console.log(`Música ${this.isMuted ? 'silenciada' : 'activada'}`);
+		});
         this.Buttons.goBackSettings.addEventListener('click', () => this.goToScreen(this.Screens.MAIN));
         this.Buttons.highscore.addEventListener('click', () => this.goToScreen(this.Screens.HIGHSCORES));
         this.Buttons.goBackHighscores.addEventListener('click', () => this.goToScreen(this.Screens.MAIN));
@@ -171,40 +177,40 @@ export class ScreenController {
 	}
 
 	
-    startGame() {
-        this.gameController.player.name = document.getElementById('idNombreJugador').value;
-        this.isGameRunning = true;
-        this.gameController.isPlaying = true;
-        this.goToScreen(this.Screens.GAME);
-        this.renderer.setSize(this.Screens.GAME.clientWidth, this.Screens.GAME.clientHeight);
-
-        if (this.mapSelected === 0){ 
-            city(this.scene);
-            this.audioManager.loadBackgroundMusic('./src/sounds/pizza.mp3');
-            this.camera.position.set(0, 6, -1);
-            this.camera.lookAt(new THREE.Vector3(0, 2, -5));
-            
-            setupLighting(this.scene);
-        }
-        else if(this.mapSelected === 1){ 
-            beach(this.scene);
-            this.audioManager.loadBackgroundMusic('./src/sounds/Sweet Sweet Canyon - Mario Kart 8 Deluxe OST.mp3');
-            this.camera.position.set(0, 6, 0);
-            this.camera.lookAt(new THREE.Vector3(0, 2.5, -5));
-            setUpLightingBeach(this.scene);
-        }
-        else{ 
-            minecraft(this.scene);
-            this.audioManager.loadBackgroundMusic('./src/sounds/room.mp3');
-            this.camera.position.set(0, 6, 0);
-            this.camera.lookAt(new THREE.Vector3(0, 2.5, -5));
-            setUpLightingMinecraft(this.scene);
-        }
-
-        this.gameController.startspawnrat();
-        this.clock.start();
-        this.animate(this.isGameRunning, this.isGamePaused);
-    }
+	startGame() {
+		this.gameController.player.name = document.getElementById('idNombreJugador').value;
+		this.isGameRunning = true;
+		this.gameController.isPlaying = true;
+		this.goToScreen(this.Screens.GAME);
+		this.renderer.setSize(this.Screens.GAME.clientWidth, this.Screens.GAME.clientHeight);
+	
+		// Establecer volumen de la música antes de cargarla
+		const volume = this.isMuted ? 0 : 0.3; // Ajusta el volumen según el estado de isMuted
+	
+		if (this.mapSelected === 0) { 
+			city(this.scene);
+			this.audioManager.loadBackgroundMusic('./src/sounds/pizza.mp3', volume); // Cargar la música
+			this.camera.position.set(0, 6, -1);
+			this.camera.lookAt(new THREE.Vector3(0, 2, -5));
+			setupLighting(this.scene);
+		} else if (this.mapSelected === 1) { 
+			beach(this.scene);
+			this.audioManager.loadBackgroundMusic('./src/sounds/Sweet Sweet Canyon - Mario Kart 8 Deluxe OST.mp3', volume);
+			this.camera.position.set(0, 6, 0);
+			this.camera.lookAt(new THREE.Vector3(0, 2.5, -5));
+			setUpLightingBeach(this.scene);
+		} else { 
+			minecraft(this.scene);
+			this.audioManager.loadBackgroundMusic('./src/sounds/room.mp3', volume);	
+			this.camera.position.set(0, 6, 0);
+			this.camera.lookAt(new THREE.Vector3(0, 2.5, -5));
+			setUpLightingMinecraft(this.scene);
+		}
+	
+		this.gameController.startspawnrat();
+		this.clock.start();
+		this.animate(this.isGameRunning, this.isGamePaused);
+	}
 
     pauseGame() {
         this.isGamePaused = true;
