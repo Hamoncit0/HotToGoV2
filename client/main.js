@@ -10,6 +10,11 @@ import Rat from './src/clases/Rat.js'
 //import Item from './src/clases/Item.js';
 import Dispenser from './src/clases/Dispenser.js';
 
+//socket
+const socket = io();
+var player1Name = '';
+var player2Name = '';
+
 // Configuración básica
 const container = document.getElementById('threejs-container');
 const scene = new THREE.Scene();
@@ -31,9 +36,9 @@ let clock = new THREE.Clock(); // Reloj para medir el tiempo
 const localPlayer = new Player(scene, './src/models/players/player_1v4.gltf', { x: 0, y: 2, z: -2 });
 
 //Controlador de pantallas
-const gameController = new GameController(scene, localPlayer);
+const gameController = new GameController(scene, localPlayer, socket);
 
-const screenController = new ScreenController(container, renderer, clock, animate, scene, camera, gameController);
+const screenController = new ScreenController(container, renderer, clock, animate, scene, camera, gameController, socket);
 gameController.loadDeliveryZone('./src/models/delivertable/table.obj', './src/models/delivertable/table.mtl', { x: -4, y: 1.5, z: -.8 });
 gameController.loadDeliveryZone('./src/models/delivertable/table.obj', './src/models/delivertable/table.mtl', { x: 3, y: 1.5, z: -.8 });
 
@@ -51,6 +56,7 @@ window.addEventListener('resize', () => {
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
 });
+
 const speed = 0.3;
 const keyboard = {};
 document.addEventListener('keydown', (event) => {
@@ -64,6 +70,7 @@ let collisionCooldown = 10000
 
 // Crear un array para los dispensers
 const dispensers = [];
+const remotePlayers = {}; // Almacena a los jugadores remotos
 
 // Agregar dispensers al array
 dispensers.push(new Dispenser(scene, { x: -4, y: 2, z: -6 }, camera, 'Pizza'));
@@ -74,12 +81,154 @@ dispensers.push(new Dispenser(scene, { x: 2, y: 2, z: -6 }, camera, 'Agua'));
 // Crear el jugador y el tag de nombre
 const playerNameTag = createPlayerNameTag(localPlayer);
 
+
+//socket.io
+
+// socket.on('start', (name) => {
+//   console.log('Jugador conectado:', name);
+//   if (name !== localPlayer.name && screenController.isGameRunning && screenController.playerModeSelected == 1) {
+//     player2Name = name;
+
+//     // Crea un nuevo jugador remoto
+//     const remotePlayer = new Player(scene, './src/models/players/player_2.gltf', { x: 2, y: 2, z: -2 });
+//     remotePlayer.name = name;
+//     remotePlayers[name] = remotePlayer;
+
+//     console.log(`Jugador remoto ${name} añadido`);
+//   }
+// });
+var isHostVar = false;
+var hostInterval;
+
+socket.on('roomInit', (data) => {
+  var { roomState, isHost } = data;
+  
+  // Configuración inicial del tiempo
+  gameController.timeRemaining = roomState.timeRemaining || 120;
+
+  if (isHost) {
+    isHostVar = true; // Bandera para el host
+    startHostResponsibilities(roomState);
+  }
+
+  // Renderizar jugadores existentes
+  Object.entries(roomState.players).forEach(([id, player]) => {
+    if (player.name !== localPlayer.name) {
+      player2Name = player.name;
+
+      // Crea un nuevo jugador remoto
+      const remotePlayer = new Player(scene, './src/models/players/player_2.gltf', { x: 2, y: 2, z: -2 });
+      remotePlayer.name = player.name;
+      remotePlayers[player.name] = remotePlayer;
+      // Crear tag para el nombre del jugador remoto
+      remotePlayer.nameTag = createPlayerNameTag(remotePlayer);
+
+
+      console.log(`Jugador remoto ${player.name} añadido`);
+    }
+  });
+
+  // Renderizar objetos si es necesario
+  roomState.objects.forEach((object) => gameController.addObjectToScene(object));
+});
+
+// Manejo de actualizaciones de tiempo desde el servidor
+socket.on('gameUpdate', (data) => {
+  if (data.timeRemaining !== undefined) {
+    gameController.timeRemaining = data.timeRemaining;
+  }
+});
+
+function startHostResponsibilities(roomState) {
+  console.log('soy responsable :D')
+  gameController.timeRemaining = roomState.timeRemaining || 120;
+
+  hostInterval = setInterval(() => {
+    gameController.timeRemaining -= 1;
+
+    // Enviar datos al servidor
+    socket.emit('hostUpdate', screenController.room, { timeRemaining: gameController.timeRemaining });
+
+    if (gameController.timeRemaining <= 0) {
+      clearInterval(hostInterval);
+      console.log('¡La partida ha terminado!');
+    }
+  }, 1000);
+}
+
+
+socket.on('newHost', () => {
+  isHostVar = true;
+  console.log('¡Ahora soy el nuevo host!');
+  startHostResponsibilities();
+});
+
+
+// Nuevo jugador en la sala
+socket.on('newPlayer', (data) => {
+  if (data.player.name !== localPlayer.name && screenController.isGameRunning && screenController.playerModeSelected == 1) {
+        player2Name = data.player.name;
+    
+        // Crea un nuevo jugador remoto
+        const remotePlayer = new Player(scene, './src/models/players/player_2.gltf', { x: 2, y: 2, z: -2 });
+        remotePlayer.name = data.player.name;
+        remotePlayers[data.player.name] = remotePlayer;
+
+        // Crear tag para el nombre del jugador remoto
+        remotePlayer.nameTag = createPlayerNameTag(remotePlayer);
+
+        console.log(`Jugador remoto ${data.player.name} añadido`);
+  }
+});
+
+socket.on('playerDisconnected', (name) => {
+  if (remotePlayers[name]) {
+    // Elimina el tag del DOM
+    const nameTag = remotePlayers[name].nameTag;
+    if (nameTag && nameTag.parentNode) {
+      nameTag.parentNode.removeChild(nameTag);
+    }
+
+    // Elimina al jugador remoto del objeto
+    delete remotePlayers[name];
+    console.log(`Jugador remoto ${name} eliminado`);
+  }
+});
+
+// Evento para actualizar la posición de jugadores remotos
+socket.on('position', (position, name) => {
+  if (remotePlayers[name]) {
+    remotePlayers[name].mesh.position.set(position.x, position.y, position.z);
+    //console.log(`Posición de ${name} actualizada:`, position);
+  }
+});
+
+socket.on('start_success', (name, playersList) => {
+  player1Name = name;
+  console.log(`Conectado como: ${player1Name}`);
+  playersList.forEach((p) => console.log(`Jugador en partida: ${p.name}`));
+});
+
+socket.on('new_player', (name) => {
+  console.log(`Nuevo jugador conectado: ${name}`);
+});
+
+setInterval(() => {
+  if (localPlayer && gameController.isPlaying) {
+    //console.log(localPlayer.name)
+    socket.emit('position', localPlayer.mesh.position, localPlayer.name);
+  }
+}, 100); // 10 veces por segundo
+
 function animate(isGameRunning, isGamePaused) {
 
     if (!isGameRunning || isGamePaused) return;
 
     requestAnimationFrame(animate);
     const deltaTime = clock.getDelta();
+    
+    //Actualizacion de particulas
+    screenController.updateParticles(deltaTime);
 
 
      if (keyboard['w'] || keyboard['W']) localPlayer.move(0, 0, -speed);
@@ -87,10 +236,21 @@ function animate(isGameRunning, isGamePaused) {
      if (keyboard['a'] || keyboard['A']) localPlayer.move(-speed, 0, 0);
      if (keyboard['d'] || keyboard['D']) localPlayer.move(speed, 0, 0);
 
+    //  if (!localPlayer.mesh.position.equals(localPlayer.previousPosition)) {
+    //   socket.emit('position', localPlayer.mesh.position, player1Name);
+    //   localPlayer.previousPosition.copy(localPlayer.mesh.position); // Actualizar la posición anterior
+    //  }
+
     scene.children.forEach((object) => {
         if (object.collisionBox && checkCollision(localPlayer, object)) {
             localPlayer.revertPosition()
         }
+    }); 
+    
+    // Renderiza a los jugadores remotos
+    Object.values(remotePlayers).forEach((remotePlayer) => {
+      remotePlayer.update(deltaTime); // Si `Player` tiene lógica de animación
+      updatePlayerNameTag(remotePlayer.nameTag, remotePlayer, camera);
     });
 
 	// Interacción con dispensers al presionar teclas

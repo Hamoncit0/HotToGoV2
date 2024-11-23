@@ -2,14 +2,18 @@ import * as THREE from 'three';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 import PowerUp from './PowerUp.js';
+import Rat from './Rat.js';
+import AudioManager from './AudioManager.js';
+
+
 export default class GameController {
-    constructor(scene, player) {
+    constructor(scene, player, socket) {
         this.scene = scene;
         this.player = player;
 
         this.orders = []; // Array para guardar órdenes
         this.points = 0; // Puntuación inicial
-        this.timeRemaining = 10; // Tiempo en segundos
+        this._timeRemaining = 120; // Tiempo en segundos
         this.deliveryZones = []; // Zonas de entrega
         this.screenController = null;
 
@@ -17,10 +21,12 @@ export default class GameController {
         this.orderFrequency = 10000;
         this.orderMaxTime = 30;
         this.maxOrderCapacity = 4;
-
+        this.audioManager = null;
         this.clock = new THREE.Clock();
         this.isPlaying = false;
         this.isGameOver = false;
+        this.socket = socket;
+
 
         // Referencias a elementos de la interfaz
         this.ordersContainer = document.querySelector('.ordenes');
@@ -29,6 +35,20 @@ export default class GameController {
 
         this.powerUps = [];
         this.spawnPowerUpsRandomly();
+
+        this.rats = [];  // Guardar todas las ratas aquí
+
+         // Escuchar actualizaciones de órdenes desde el servidor
+        this.socket.on('ordersUpdate', (updatedOrders) => {
+            this.orders = updatedOrders;
+            this.updateOrdersDisplay();
+        });
+
+        // Escuchar actualización de puntuación
+        this.socket.on('scoreUpdate', (updatedPoints) => {
+            this.points = updatedPoints;
+            this.updateScoreDisplay();
+        });
 
         // Intervalo para decrementar el tiempo
         setInterval(() => {
@@ -44,7 +64,40 @@ export default class GameController {
             }
         }, 1000);
     } 
+    get timeRemaining() {
+        return this._timeRemaining;
+    }
 
+    startspawnrat(){
+		// Verificar la dificultad y generar ratas solo si la dificultad es "Dificil"
+        if (this.screenController.difficulty === 1) {
+            // Spawn de ratas a intervalos aleatorios
+            setInterval(() => {
+                if (this.isPlaying) {
+                    this.spawnRat();  // Generar una nueva rata cada 2-5 segundos
+                }
+            }, Math.random() * (5000 - 2000) + 2000); // Intervalo aleatorio entre 2-5 segundos
+        }
+	}
+
+    // Generar una rata en una posición aleatoria
+    spawnRat() {
+        const randomPosition = this.getRandomPosition(new THREE.Vector3(-5, 2, -5), new THREE.Vector3(5, 2, -5));
+        const rat = new Rat(this.scene, randomPosition, this.audioManager);
+        this.rats.push(rat);
+        console.log("Rata generada en:", randomPosition);
+    }
+
+
+    set timeRemaining(value) {
+        this._timeRemaining = value;
+        this.updateTimeDisplay(); // Llama a la función para actualizar la interfaz
+        if (this._timeRemaining <= 0 && this.isPlaying) {
+            this.screenController.endGame();
+            this.endGame();
+        }
+    }
+    
     endGame() {
         this.isPlaying = false;
         this.isGameOver = true; // Marca el juego como terminado
@@ -189,6 +242,9 @@ export default class GameController {
         this.orders.push(newOrder);
         this.updateOrdersDisplay();
 
+        // Emitir las órdenes actualizadas al servidor
+        this.socket.emit('updateOrders', this.orders);
+
         // Intervalo para actualizar el tiempo restante de la orden
         const orderIndex = this.orders.length - 1;
         const interval = setInterval(() => {
@@ -205,6 +261,10 @@ export default class GameController {
                 this.points -= 10; // Penalización por no entregar
                 this.updateScoreDisplay();
                 this.updateOrdersDisplay();
+
+                // Sincronizar cambios con el servidor
+                this.socket.emit('updateOrders', this.orders);
+                this.socket.emit('updateScore', this.points);
             } else {
                 this.updateOrdersDisplay();
             }
@@ -222,9 +282,16 @@ export default class GameController {
                 this.points += 10;
                 this.updateScoreDisplay();
                 this.updateOrdersDisplay();
+
+                 // Emitir actualizaciones al servidor
+                this.socket.emit('updateOrders', this.orders);
+                this.socket.emit('updateScore', this.points);
             } else {
                 this.points -= 5;
                 this.updateScoreDisplay();
+
+                // Emitir puntuación actualizada al servidor
+                this.socket.emit('updateScore', this.points);
             }
             this.player.heldObject.destroy();
             this.player.heldObject = null;
@@ -243,12 +310,34 @@ export default class GameController {
             }
         });
 
+        // Actualizar ratas y verificar colisiones
+        this.rats.forEach((rat) => {
+			if (rat.mesh) {
+				rat.update(delta, this.player, this.screenController.difficulty);
+			}
+        });
+
         // Verificar colisiones con PowerUps
         this.powerUps.forEach((powerUp, index) => {
-            if (powerUp.isNear(this.player.collisionBox)) {
+            if (powerUp.mesh && powerUp.isNear(this.player.collisionBox)) {
             powerUp.applyEffect(this.player, this);
+            this.socket.emit('updateScore', this.points);
             this.powerUps.splice(index, 1); // Eliminar el power-up del array
             }
         });
     }
+
+    checkCollision(player1, object) {
+      return player1.collisionBox.intersectsBox(object.collisionBox);
+    }
+    removeAllRats() {
+        this.rats.forEach((rat) => {
+           rat.destroy();
+        });
+    
+        // Limpia el array de ratas
+        this.rats = [];
+        console.log('Todas las ratas han sido eliminadas.');
+    }
+    
 }
