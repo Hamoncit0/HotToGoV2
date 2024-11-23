@@ -226,6 +226,9 @@ function animate(isGameRunning, isGamePaused) {
 
     requestAnimationFrame(animate);
     const deltaTime = clock.getDelta();
+    
+    //Actualizacion de particulas
+    screenController.updateParticles(deltaTime);
 
 
      if (keyboard['w'] || keyboard['W']) localPlayer.move(0, 0, -speed);

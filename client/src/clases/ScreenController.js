@@ -5,6 +5,8 @@ import AudioManager from './AudioManager.js';
 import GameController from "./GameController.js";
 import { getHighscores, saveHighscore } from "../webServices/webService.js";
 
+import { updateFire } from '../clases/particles.js';
+
 import * as THREE from 'three';
 export class ScreenController {
     constructor(container, renderer, clock, animate, scene, camera, gameController, socket) {
@@ -26,6 +28,8 @@ export class ScreenController {
         this.gameController.audioManager = this.audioManager;
         this.socket = socket;
         this.room= '';
+
+        this.particlesToUpdate = [];
 
         // PANTALLAS
         this.Screens = {
@@ -74,6 +78,14 @@ export class ScreenController {
         this.audioManager.loadSound('ratVisible', './src/sounds/concrete.mp3', 1);
 
         this.init();
+    }
+    //Actualizar particulas
+    updateParticles(deltaTime) {
+        if (this.particlesToUpdate.length > 0) {
+            this.particlesToUpdate.forEach(particle => {
+                updateFire(particle, deltaTime); // Lógica de actualización de partículas
+            });
+        }
     }
 
     // Inicializa los listeners de los botones y eventos
@@ -196,7 +208,9 @@ export class ScreenController {
 
 
         if (this.mapSelected === 0){ 
-            city(this.scene);
+
+            this.particlesToUpdate = city(this.scene);
+
             this.audioManager.loadBackgroundMusic('./src/sounds/pizza.mp3');
             this.camera.position.set(0, 6, -1);
             this.camera.lookAt(new THREE.Vector3(0, 2, -5));
@@ -204,14 +218,17 @@ export class ScreenController {
             setupLighting(this.scene);
         }
         else if(this.mapSelected === 1){ 
-            beach(this.scene);
+
+            this.particlesToUpdate = beach(this.scene);
+
             this.audioManager.loadBackgroundMusic('./src/sounds/Sweet Sweet Canyon - Mario Kart 8 Deluxe OST.mp3');
             this.camera.position.set(0, 6, 0);
             this.camera.lookAt(new THREE.Vector3(0, 2.5, -5));
             setUpLightingBeach(this.scene);
         }
         else{ 
-            minecraft(this.scene);
+            this.particlesToUpdate = minecraft(this.scene);
+
             this.audioManager.loadBackgroundMusic('./src/sounds/room.mp3');
             this.camera.position.set(0, 6, 0);
             this.camera.lookAt(new THREE.Vector3(0, 2.5, -5));
