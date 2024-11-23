@@ -21,6 +21,7 @@ export class ScreenController {
         this.isGamePaused = false;
         this.actualScreen = null;
         this.playerModeSelected = 0; // 0: single player, 1: multiplayer
+        this.gameMode = 0; // 0: time, 1: lives
         this.mapSelected = 0; // 0: city, 1: beach
         this.difficulty = 0; // 0: normal, 1: hard
         this.gameController = gameController;
@@ -43,7 +44,8 @@ export class ScreenController {
             GAME: container,
             SETTINGS: document.getElementById('config-screen'),
             HIGHSCORES: document.getElementById('highscores'),
-            ROOM: document.getElementById('room-input')
+            ROOM: document.getElementById('room-input'),
+            MODE: document.getElementById('game-mode')
         };
 
         // BOTONES
@@ -70,6 +72,9 @@ export class ScreenController {
             goBackHighscores: document.getElementById('btn-go-back-highscores'),
             joinRoom: document.getElementById('join-room-btn'),
             goBackRoom: document.getElementById('go-back-room'),
+            limitedTime: document.getElementById('limitedtime-btn'),
+            byLives: document.getElementById('bylives-btn'),
+            goBackMode: document.getElementById('go-back-mode')
         };
         this.audioManager.loadBackgroundMusic('./src/sounds/Spagonia (Day) - Sonic Unleashed [OST].mp3');
 
@@ -120,7 +125,7 @@ export class ScreenController {
         this.Buttons.goBackPlayer.addEventListener('click', () => this.goToScreen(this.Screens.MAIN));
         this.Buttons.goBackMap.addEventListener('click', () => this.goToScreen(this.Screens.DIFFICULTY));
         this.Buttons.goBackUser.addEventListener('click', () => this.goToScreen(this.Screens.MAP));
-        this.Buttons.goBackDifficulty.addEventListener('click', () => this.goToScreen(this.Screens.PLAYER));
+        this.Buttons.goBackDifficulty.addEventListener('click', () => this.goToScreen(this.Screens.MODE));
         this.Buttons.goBackEnd.addEventListener('click', () => location.reload());
         this.Buttons.settings.addEventListener('click', () => this.goToScreen(this.Screens.SETTINGS));
         this.Buttons.goBackSettings.addEventListener('click', () => this.goToScreen(this.Screens.MAIN));
@@ -128,6 +133,9 @@ export class ScreenController {
         this.Buttons.goBackHighscores.addEventListener('click', () => this.goToScreen(this.Screens.MAIN));
         this.Buttons.joinRoom.addEventListener('click', () => this.startGame());
         this.Buttons.goBackRoom.addEventListener('click', () => this.goToScreen(this.Screens.USERNAME));
+        this.Buttons.limitedTime.addEventListener('click', () => this.selectGameMode(0));
+        this.Buttons.byLives.addEventListener('click', () => this.selectGameMode(1));
+        this.Buttons.goBackMode.addEventListener('click', () => this.goToScreen(this.Screens.PLAYER));
 
         window.addEventListener('keydown', (event) => this.handleKeydown(event));
     }
@@ -161,12 +169,16 @@ export class ScreenController {
 
     selectPlayerMode(mode) {
         this.playerModeSelected = mode;
-        this.goToScreen(this.Screens.DIFFICULTY);
+        this.goToScreen(this.Screens.MODE);
     }
     selectDifficulty(difficulty) {
         this.difficulty = difficulty;
         this.goToScreen(this.Screens.MAP);
 
+    }
+    selectGameMode(mode) {
+        this.gameMode = mode;
+        this.goToScreen(this.Screens.DIFFICULTY);
     }
 
     selectMap(map) {
@@ -201,8 +213,14 @@ export class ScreenController {
         this.goToScreen(this.Screens.GAME);
         this.renderer.setSize(this.Screens.GAME.clientWidth, this.Screens.GAME.clientHeight);
 
+        if(this.gameMode ==0){
+            document.getElementById('lives').setAttribute('hidden', 'true');
+        }else{
+            document.getElementById('time').setAttribute('hidden', 'true');
+        }
+
         if(this.playerModeSelected == 1){
-         this.startConnection();
+            this.startConnection();
             this.joinRoom();
         }
 

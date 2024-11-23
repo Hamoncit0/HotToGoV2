@@ -14,8 +14,10 @@ export default class GameController {
         this.orders = []; // Array para guardar órdenes
         this.points = 0; // Puntuación inicial
         this._timeRemaining = 120; // Tiempo en segundos
+        this.lives = 3; // Número inicial de vidas
         this.deliveryZones = []; // Zonas de entrega
         this.screenController = null;
+        this.gameMode = 0; // 0 para tiempo, 1 para vidas
 
         //Variables que controlan la dificultad
         this.orderFrequency = 10000;
@@ -51,15 +53,24 @@ export default class GameController {
         });
 
         // Intervalo para decrementar el tiempo
+        // Lógica de actualización de tiempo y vidas
         setInterval(() => {
-            if (this.isPlaying && this.timeRemaining > 0) {
-                this.timeRemaining--;
-                this.updateTimeDisplay();
-    
-                // Verificar fin del juego
-                if (this.timeRemaining <= 0) {
-                    this.screenController.endGame();
-                    this.endGame();
+            if (this.isPlaying) {
+                if (this.screenController.gameMode === 0) {
+                    // Fin por tiempo
+                    if (this.timeRemaining > 0) {
+                        this.timeRemaining--;
+                        this.updateTimeDisplay();
+                    } else {
+                        this.screenController.endGame();
+                        this.endGame();
+                    }
+                } else if (this.screenController.gameMode === 1) {
+                    // Fin por vidas
+                    if (this.lives <= 0) {
+                        this.screenController.endGame();
+                        this.endGame();
+                    }
                 }
             }
         }, 1000);
@@ -288,6 +299,8 @@ export default class GameController {
                 this.socket.emit('updateScore', this.points);
             } else {
                 this.points -= 5;
+                this.lives -= 1;
+                this.updateLivesUI()
                 this.updateScoreDisplay();
 
                 // Emitir puntuación actualizada al servidor
@@ -297,6 +310,25 @@ export default class GameController {
             this.player.heldObject = null;
         }
     }
+    updateLivesUI() {
+        const livesElement = document.getElementById('lives');
+        livesElement.innerHTML = '';  // Limpiamos el contenido actual
+    
+        // Agregar tantos íconos de corazón como el número de vidas
+        for (let i = 0; i < this.lives; i++) {
+            const heartIcon = document.createElement('i');
+            heartIcon.classList.add('bi', 'bi-heart-fill');
+            livesElement.appendChild(heartIcon);
+        }
+    
+        // Si las vidas son menores a 3, se pueden mostrar corazones vacíos
+        for (let i = this.lives; i < 3; i++) {
+            const heartIcon = document.createElement('i');
+            heartIcon.classList.add('bi', 'bi-heart');
+            livesElement.appendChild(heartIcon);
+        }
+    }
+    
     // Actualizar lógica del juego
     update() {
         const delta = this.clock.getDelta();
