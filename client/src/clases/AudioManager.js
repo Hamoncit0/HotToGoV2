@@ -55,6 +55,14 @@ class AudioManager {
             console.warn(`Sonido ${name} no encontrado`);
         }
     }
+    // Detener un efecto de sonido
+    stopSound(name) {
+        const sound = this.sounds[name];
+        if (sound && sound.isPlaying) {
+            sound.stop();
+        }
+    }
+
 
     // Pausar la música de fondo
     pauseBackgroundMusic() {

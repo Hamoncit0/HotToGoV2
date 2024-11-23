@@ -5,9 +5,11 @@ import AudioManager from './AudioManager.js';
 import GameController from "./GameController.js";
 import { getHighscores, saveHighscore } from "../webServices/webService.js";
 
+import { updateFire } from '../clases/particles.js';
+
 import * as THREE from 'three';
 export class ScreenController {
-    constructor(container, renderer, clock, animate, scene, camera, gameController) {
+    constructor(container, renderer, clock, animate, scene, camera, gameController, socket) {
         this.container = container;
         this.renderer = renderer;
         this.clock = clock;
@@ -19,11 +21,17 @@ export class ScreenController {
         this.isGamePaused = false;
         this.actualScreen = null;
         this.playerModeSelected = 0; // 0: single player, 1: multiplayer
+        this.gameMode = 0; // 0: time, 1: lives
         this.mapSelected = 0; // 0: city, 1: beach
         this.difficulty = 0; // 0: normal, 1: hard
         this.gameController = gameController;
         this.gameController.screenController = this;
 		this.isMuted = false;
+        this.gameController.audioManager = this.audioManager;
+        this.socket = socket;
+        this.room= '';
+
+        this.particlesToUpdate = [];
 
         // PANTALLAS
         this.Screens = {
@@ -36,7 +44,9 @@ export class ScreenController {
             GAMEOVER: document.getElementById('game-over'),
             GAME: container,
             SETTINGS: document.getElementById('config-screen'),
-            HIGHSCORES: document.getElementById('highscores')
+            HIGHSCORES: document.getElementById('highscores'),
+            ROOM: document.getElementById('room-input'),
+            MODE: document.getElementById('game-mode')
         };
 
         // BOTONES
@@ -64,13 +74,27 @@ export class ScreenController {
             goBackEnd: document.getElementById('btn-go-back-end'),
             goBackSettings: document.getElementById('btn-go-back-settings'),
             goBackHighscores: document.getElementById('btn-go-back-highscores'),
+            joinRoom: document.getElementById('join-room-btn'),
+            goBackRoom: document.getElementById('go-back-room'),
+            limitedTime: document.getElementById('limitedtime-btn'),
+            byLives: document.getElementById('bylives-btn'),
+            goBackMode: document.getElementById('go-back-mode')
         };
         this.audioManager.loadBackgroundMusic('./src/sounds/Spagonia (Day) - Sonic Unleashed [OST].mp3');
 
         // Cargar efecto de sonido para clics
         this.audioManager.loadSound('click', './src/sounds/ButtonPlate Click (Minecraft Sound) - Sound Effect for editing.mp3');
+        this.audioManager.loadSound('ratVisible', './src/sounds/concrete.mp3', 1);
 
         this.init();
+    }
+    //Actualizar particulas
+    updateParticles(deltaTime) {
+        if (this.particlesToUpdate.length > 0) {
+            this.particlesToUpdate.forEach(particle => {
+                updateFire(particle, deltaTime); // Lógica de actualización de partículas
+            });
+        }
     }
 
     // Inicializa los listeners de los botones y eventos
@@ -93,13 +117,19 @@ export class ScreenController {
         this.Buttons.city.addEventListener('click', () => this.selectMap(0));
         this.Buttons.beach.addEventListener('click', () => this.selectMap(1));
         this.Buttons.minecraft.addEventListener('click', () => this.selectMap(2));
-        this.Buttons.join.addEventListener('click', () => this.startGame());
+        this.Buttons.join.addEventListener('click', () => {
+            if(this.playerModeSelected == 1)
+            this.goToScreen(this.Screens.ROOM)
+            else if(this.playerModeSelected == 0)
+            this.startGame();
+        }
+        );
         this.Buttons.continue.addEventListener('click', () => this.resumeGame());
         this.Buttons.end.addEventListener('click', () => location.reload());
         this.Buttons.goBackPlayer.addEventListener('click', () => this.goToScreen(this.Screens.MAIN));
         this.Buttons.goBackMap.addEventListener('click', () => this.goToScreen(this.Screens.DIFFICULTY));
         this.Buttons.goBackUser.addEventListener('click', () => this.goToScreen(this.Screens.MAP));
-        this.Buttons.goBackDifficulty.addEventListener('click', () => this.goToScreen(this.Screens.PLAYER));
+        this.Buttons.goBackDifficulty.addEventListener('click', () => this.goToScreen(this.Screens.MODE));
         this.Buttons.goBackEnd.addEventListener('click', () => location.reload());
         this.Buttons.settings.addEventListener('click', () => this.goToScreen(this.Screens.SETTINGS));
 		this.Buttons.settingsCheckbox1.addEventListener('click', () => this.resizeWindow(1));  // Full 
@@ -113,6 +143,11 @@ export class ScreenController {
         this.Buttons.goBackSettings.addEventListener('click', () => this.goToScreen(this.Screens.MAIN));
         this.Buttons.highscore.addEventListener('click', () => this.goToScreen(this.Screens.HIGHSCORES));
         this.Buttons.goBackHighscores.addEventListener('click', () => this.goToScreen(this.Screens.MAIN));
+        this.Buttons.joinRoom.addEventListener('click', () => this.startGame());
+        this.Buttons.goBackRoom.addEventListener('click', () => this.goToScreen(this.Screens.USERNAME));
+        this.Buttons.limitedTime.addEventListener('click', () => this.selectGameMode(0));
+        this.Buttons.byLives.addEventListener('click', () => this.selectGameMode(1));
+        this.Buttons.goBackMode.addEventListener('click', () => this.goToScreen(this.Screens.PLAYER));
 
         window.addEventListener('keydown', (event) => this.handleKeydown(event));
     }
@@ -148,12 +183,16 @@ export class ScreenController {
 
     selectPlayerMode(mode) {
         this.playerModeSelected = mode;
-        this.goToScreen(this.Screens.DIFFICULTY);
+        this.goToScreen(this.Screens.MODE);
     }
     selectDifficulty(difficulty) {
         this.difficulty = difficulty;
         this.goToScreen(this.Screens.MAP);
 
+    }
+    selectGameMode(mode) {
+        this.gameMode = mode;
+        this.goToScreen(this.Screens.DIFFICULTY);
     }
 
     selectMap(map) {
@@ -167,6 +206,19 @@ export class ScreenController {
             this.startGame();
         }
     }
+    startConnection() {
+      const player1Name = document.getElementById("idNombreJugador").value;
+      this.socket.emit('start', player1Name);
+    }
+    joinRoom(){
+        const player1Name = document.getElementById("idNombreJugador").value;
+        this.room = document.getElementById("idRoom").value;
+        this.socket.emit('joinRoom', this.room, {
+            name: player1Name,
+            position: { x: 2, y: 2, z: -2 },
+        });
+    }
+    
 
 	resizeWindow(size) {
 		
@@ -187,30 +239,50 @@ export class ScreenController {
 		// Establecer volumen de la música antes de cargarla
 		const volume = this.isMuted ? 0 : 0.3; // Ajusta el volumen según el estado de isMuted
 	
-		if (this.mapSelected === 0) { 
-			city(this.scene);
-			this.audioManager.loadBackgroundMusic('./src/sounds/pizza.mp3', volume); // Cargar la música
-			this.camera.position.set(0, 6, -1);
-			this.camera.lookAt(new THREE.Vector3(0, 2, -5));
-			setupLighting(this.scene);
-		} else if (this.mapSelected === 1) { 
-			beach(this.scene);
-			this.audioManager.loadBackgroundMusic('./src/sounds/Sweet Sweet Canyon - Mario Kart 8 Deluxe OST.mp3', volume);
-			this.camera.position.set(0, 6, 0);
-			this.camera.lookAt(new THREE.Vector3(0, 2.5, -5));
-			setUpLightingBeach(this.scene);
-		} else { 
-			minecraft(this.scene);
-			this.audioManager.loadBackgroundMusic('./src/sounds/room.mp3', volume);	
-			this.camera.position.set(0, 6, 0);
-			this.camera.lookAt(new THREE.Vector3(0, 2.5, -5));
-			setUpLightingMinecraft(this.scene);
-		}
-	
-		this.gameController.startspawnrat();
-		this.clock.start();
-		this.animate(this.isGameRunning, this.isGamePaused);
-	}
+        if(this.gameMode ==0){
+            document.getElementById('lives').setAttribute('hidden', 'true');
+        }else{
+            document.getElementById('time').setAttribute('hidden', 'true');
+        }
+
+        if(this.playerModeSelected == 1){
+            this.startConnection();
+            this.joinRoom();
+        }
+
+
+        if (this.mapSelected === 0){ 
+
+            this.particlesToUpdate = city(this.scene);
+
+            this.audioManager.loadBackgroundMusic('./src/sounds/pizza.mp3');
+            this.camera.position.set(0, 6, -1);
+            this.camera.lookAt(new THREE.Vector3(0, 2, -5));
+            
+            setupLighting(this.scene);
+        }
+        else if(this.mapSelected === 1){ 
+
+            this.particlesToUpdate = beach(this.scene);
+
+            this.audioManager.loadBackgroundMusic('./src/sounds/Sweet Sweet Canyon - Mario Kart 8 Deluxe OST.mp3');
+            this.camera.position.set(0, 6, 0);
+            this.camera.lookAt(new THREE.Vector3(0, 2.5, -5));
+            setUpLightingBeach(this.scene);
+        }
+        else{ 
+            this.particlesToUpdate = minecraft(this.scene);
+
+            this.audioManager.loadBackgroundMusic('./src/sounds/room.mp3');
+            this.camera.position.set(0, 6, 0);
+            this.camera.lookAt(new THREE.Vector3(0, 2.5, -5));
+            setUpLightingMinecraft(this.scene);
+        }
+
+        this.gameController.startspawnrat();
+        this.clock.start();
+        this.animate(this.isGameRunning, this.isGamePaused);
+    }
 
     pauseGame() {
         this.isGamePaused = true;

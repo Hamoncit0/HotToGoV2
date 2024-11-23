@@ -49,6 +49,7 @@
         </div>
         <h4 id="score">Score: 0</h4>
         <h4 id="time">Time: 0</h4>
+        <h4 id="lives"><i class="bi bi-heart-fill"></i><i class="bi bi-heart-fill"></i><i class="bi bi-heart-fill"></i></h4>
         <div id="player-names-container" style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 10;"></div>
 
        </div>
@@ -79,6 +80,15 @@
             <button id="go-back-player" class="btn btn-primary play-btn d-flex align-items-center justify-content-center">Go Back</button>
         </div>
     </div>
+    <!-- game mode -->
+    <div class="canvas" id="game-mode" style="display: none;"  >
+        <div class="player-mode">
+            <h1>Game Mode</h1>
+            <button id="limitedtime-btn" class="btn btn-primary play-btn d-flex align-items-center justify-content-center">Limited-time</button>
+            <button id="bylives-btn"class="btn btn-primary play-btn d-flex align-items-center justify-content-center">By lives</button>
+            <button id="go-back-mode" class="btn btn-primary play-btn d-flex align-items-center justify-content-center">Go Back</button>
+        </div>
+    </div>
     <!-- seleccionar mapa -->
     <div class="canvas" id="map-selector"style="display: none;"  >
         <div class="level-mode">
@@ -107,6 +117,15 @@
             <input id="idNombreJugador" autocomplete="off" class="form-control" />
             <input id="join-btn" type="button" value="Join" class="btn  btn-primary play-btn "/>
             <input id="go-back-username" type="button" value="Go back" class="btn  btn-primary play-btn "/>
+        </div>
+    </div>
+    <!-- seleccionar room -->
+    <div class="canvas" id="room-input" style="display: none;"  >
+        <div class="player-mode">
+            <h1>Choose a room</h1>
+            <input id="idRoom" autocomplete="off" class="form-control" />
+            <input id="join-room-btn" type="button" value="Join" class="btn  btn-primary play-btn "/>
+            <input id="go-back-room" type="button" value="Go back" class="btn  btn-primary play-btn "/>
         </div>
     </div>
     <!-- Game over -->

@@ -347,6 +347,14 @@ h1{
       color: #a80000;
       text-shadow: #000000 .5vh .5vh;
     }
+    #lives{
+      position: absolute;
+      bottom: .5rem;
+      right: 1rem;
+      font-size: 4rem;
+      color: #a80000;
+      text-shadow: #000000 .5vh .5vh;
+    }
     #score{
       position: absolute;
       bottom: .5rem;

@@ -1,11 +1,14 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import AudioManager from './AudioManager.js';
 
 export default class Rat {
-	constructor(scene, initialPosition = { x: 0, y: 2, z: 0 }) {
+	constructor(scene, initialPosition = { x: 0, y: 2, z: 0 }, audioManager) {
 		this.scene = scene;
 		this.speed = 0.05; // Velocidad para seguir al jugador
-		this.stunDuration = 1; // Tiempo durante el cual el jugador queda atónito
+		this.stunDuration = 2; // Tiempo durante el cual el jugador queda atónito
+		this.isSoundPlaying = false;
+        this.audioManager = audioManager;
 
 		const loader = new GLTFLoader();
 		loader.load('./src/models/cursed-rat/rat.gltf', (gltf) => {
@@ -46,7 +49,23 @@ export default class Rat {
 			player.stun(this.stunDuration); // Llamar al método de aturdir del jugador
 			this.destroy(); // Eliminar la rata de la escena
 		}
+
+        // Verificar si la rata está en pantalla
+        this.checkVisibilityAndPlaySound();
 	}
+
+	checkVisibilityAndPlaySound() {
+        if (!this.mesh) return;
+
+            // Si la rata está en el campo de visión, reproducir el sonido
+            if (!this.isSoundPlaying) {
+                this.audioManager.playSound('ratVisible');
+                this.isSoundPlaying = true;
+			}else{
+
+			}
+    }
+
 
 	// Método para destruir el objeto
 	destroy() {
@@ -66,6 +85,10 @@ export default class Rat {
 				}
 			});
 
+			if (this.isSoundPlaying) {
+                this.audioManager.stopSound('ratVisible');
+                this.isSoundPlaying = false;
+            }
 			// Eliminar referencias
 			this.mesh = null;
 			this.collisionBox = null;

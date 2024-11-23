@@ -1,0 +1,28 @@
+newmtl textura_escalera1
+illum 4
+Kd 1.00 1.00 1.00
+Ka 1.00 1.00 1.00
+Tf 1.00 1.00 1.00
+map_Kd texturas_minecraft.png
+Ni 1.00
+newmtl textura_horno1
+illum 4
+Kd 1.00 1.00 1.00
+Ka 1.00 1.00 1.00
+Tf 1.00 1.00 1.00
+map_Kd horno.png
+Ni 1.00
+newmtl textura_madera1
+illum 4
+Kd 1.00 1.00 1.00
+Ka 1.00 1.00 1.00
+Tf 1.00 1.00 1.00
+map_Kd texturas_minecraft.png
+Ni 1.00
+newmtl textura_mesa1
+illum 4
+Kd 1.00 1.00 1.00
+Ka 1.00 1.00 1.00
+Tf 1.00 1.00 1.00
+map_Kd texturas_minecraft.png
+Ni 1.00
