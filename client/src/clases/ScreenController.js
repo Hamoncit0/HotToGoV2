@@ -255,7 +255,7 @@ export class ScreenController {
 
             this.particlesToUpdate = city(this.scene);
 
-            this.audioManager.loadBackgroundMusic('./src/sounds/pizza.mp3');
+            this.audioManager.loadBackgroundMusic('./src/sounds/pizza.mp3', volume);
             this.camera.position.set(0, 6, -1);
             this.camera.lookAt(new THREE.Vector3(0, 2, -5));
             
@@ -265,7 +265,7 @@ export class ScreenController {
 
             this.particlesToUpdate = beach(this.scene);
 
-            this.audioManager.loadBackgroundMusic('./src/sounds/Sweet Sweet Canyon - Mario Kart 8 Deluxe OST.mp3');
+            this.audioManager.loadBackgroundMusic('./src/sounds/Sweet Sweet Canyon - Mario Kart 8 Deluxe OST.mp3', volume);
             this.camera.position.set(0, 6, 0);
             this.camera.lookAt(new THREE.Vector3(0, 2.5, -5));
             setUpLightingBeach(this.scene);
@@ -273,7 +273,7 @@ export class ScreenController {
         else{ 
             this.particlesToUpdate = minecraft(this.scene);
 
-            this.audioManager.loadBackgroundMusic('./src/sounds/room.mp3');
+            this.audioManager.loadBackgroundMusic('./src/sounds/room.mp3', volume);
             this.camera.position.set(0, 6, 0);
             this.camera.lookAt(new THREE.Vector3(0, 2.5, -5));
             setUpLightingMinecraft(this.scene);
