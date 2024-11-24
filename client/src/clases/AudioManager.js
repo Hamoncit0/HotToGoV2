@@ -1,4 +1,3 @@
-// AudioManager.js
 import * as THREE from 'three';
 
 class AudioManager {
@@ -13,6 +12,9 @@ class AudioManager {
         // Almacenar música de fondo y efectos
         this.backgroundMusic = null;
         this.sounds = {};
+        
+        // Inicializar el estado de silenciado
+        this.isMuted = false; // Por defecto, la música no está silenciada
     }
 
     // Cargar y reproducir música de fondo
@@ -24,8 +26,10 @@ class AudioManager {
         this.audioLoader.load(path, (buffer) => {
             this.backgroundMusic.setBuffer(buffer);
             this.backgroundMusic.setLoop(loop);
-            this.backgroundMusic.setVolume(volume);
-            this.backgroundMusic.play();
+            this.backgroundMusic.setVolume(this.isMuted ? 0 : volume); // Verifica si está silenciado
+            if (!this.isMuted) {
+                this.backgroundMusic.play(); // Solo reproduce si no está silenciado
+            }
         });
     }
 
@@ -71,6 +75,36 @@ class AudioManager {
     resumeBackgroundMusic() {
         if (this.backgroundMusic && !this.backgroundMusic.isPlaying) {
             this.backgroundMusic.play();
+        }
+    }
+
+    // Ajustar el volumen de la música de fondo
+    setBackgroundMusicVolume(volume) {
+        if (this.backgroundMusic) {
+            this.backgroundMusic.setVolume(volume);
+        }
+    }
+
+    // Ajustar el volumen de un efecto de sonido
+    setSoundVolume(name, volume) {
+        const sound = this.sounds[name];
+        if (sound) {
+            sound.setVolume(volume);
+        } else {
+            console.warn(`Sonido ${name} no encontrado`);
+        }
+    }
+
+    // Alternar entre silenciar y activar la música
+    toggleMute() {
+        this.isMuted = !this.isMuted;
+        if (this.backgroundMusic) {
+            this.backgroundMusic.setVolume(this.isMuted ? 0 : 0.3); // Establece el volumen según el estado
+            if (this.isMuted) {
+                this.backgroundMusic.pause(); // Si está silenciado, detén la música
+            } else {
+                this.backgroundMusic.play(); // Si no está silenciado, reanuda la música
+            }
         }
     }
 }

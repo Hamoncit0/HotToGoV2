@@ -49,6 +49,7 @@
         </div>
         <h4 id="score">Score: 0</h4>
         <h4 id="time">Time: 0</h4>
+        <h4 id="lives"><i class="bi bi-heart-fill"></i><i class="bi bi-heart-fill"></i><i class="bi bi-heart-fill"></i></h4>
         <div id="player-names-container" style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 10;"></div>
 
        </div>
@@ -77,6 +78,15 @@
             <button id="singleplayer-btn" class="btn btn-primary play-btn d-flex align-items-center justify-content-center">Single Player</button>
             <button id="multiplayer-btn"class="btn btn-primary play-btn d-flex align-items-center justify-content-center">Multi Player</button>
             <button id="go-back-player" class="btn btn-primary play-btn d-flex align-items-center justify-content-center">Go Back</button>
+        </div>
+    </div>
+    <!-- game mode -->
+    <div class="canvas" id="game-mode" style="display: none;"  >
+        <div class="player-mode">
+            <h1>Game Mode</h1>
+            <button id="limitedtime-btn" class="btn btn-primary play-btn d-flex align-items-center justify-content-center">Limited-time</button>
+            <button id="bylives-btn"class="btn btn-primary play-btn d-flex align-items-center justify-content-center">By lives</button>
+            <button id="go-back-mode" class="btn btn-primary play-btn d-flex align-items-center justify-content-center">Go Back</button>
         </div>
     </div>
     <!-- seleccionar mapa -->
@@ -147,19 +157,19 @@
                             <input type="checkbox" id="custom-checbox">
                             <label for="custom-checbox"></label>
                         </div>
-                        <h3>Option 1</h3>
+                        <h3>HQ</h3>
                     </div><div class="option">
                         <div class="custom-checkbox">
                             <input type="checkbox" id="custom-checbox1">
                             <label for="custom-checbox1"></label>
                         </div>
-                        <h3>Option 2</h3>
+                        <h3>LQ</h3>
                     </div><div class="option">
                         <div class="custom-checkbox">
                             <input type="checkbox" id="custom-checbox2">
                             <label for="custom-checbox2"></label>
                         </div>
-                        <h3>Option 3</h3>
+                        <h3>MUTE</h3>
                     </div>
                 </div>
                 <button class="btn btn-primary" id="btn-go-back-settings">Go back</button>
