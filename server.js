@@ -118,7 +118,7 @@ io.on('connection', (socket) => {
   });
 
 
-  socket.on('joinRoom', (roomName, playerData) => {
+  socket.on('joinRoom', (roomName, playerData, gameSettings) => {
     if (!rooms[roomName]) {
       // Crear la sala si no existe
       rooms[roomName] = {
@@ -126,6 +126,11 @@ io.on('connection', (socket) => {
         objects: [],
         host: socket.id, // El primer jugador será el host
         timeRemaining: 120,
+        settings: {
+          gameMode: gameSettings.gameMode,
+          difficulty: gameSettings.difficulty,
+          mapSelected: gameSettings.mapSelected,
+        }
       };
     }else if (!rooms[roomName].host) {
       // Asignar host si no hay uno (fallback)
@@ -146,7 +151,7 @@ io.on('connection', (socket) => {
     //socket.emit('roomInit', rooms[roomName]);
     socket.emit('roomInit', {
       roomState: rooms[roomName],
-      isHost: socket.id === rooms[roomName].host, // Informar si es el host
+      isHost: socket.id === rooms[roomName].host // Informar si es el host
     });
 
     // Avisar a los demás en la sala que un nuevo jugador se unió
@@ -172,6 +177,14 @@ io.on('connection', (socket) => {
     }
   });
   
+  socket.on('gameSettingsUpdate', (settings) => {
+    const room = Object.keys(rooms).find((room) => rooms[room].players[socket.id]);
+    if (room && rooms[room].host === socket.id) {
+        rooms[room].settings = settings;
+        io.to(room).emit('gameSettingsUpdate', settings); // Broadcast to all players
+        console.log(`Updated game settings for room ${room}:`, settings);
+    }
+  });
 
 
   // Actualizar posición del jugador

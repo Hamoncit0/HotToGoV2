@@ -28,7 +28,7 @@ export default class GameController {
         this.isPlaying = false;
         this.isGameOver = false;
         this.socket = socket;
-
+        this.isHost = false;
 
         // Referencias a elementos de la interfaz
         this.ordersContainer = document.querySelector('.ordenes');
@@ -52,6 +52,13 @@ export default class GameController {
             this.updateScoreDisplay();
         });
 
+        this.socket.on('gameSettingsUpdate', (settings) => {
+            console.log('Received game settings:', settings);
+            this.screenController.gameMode = settings.gameMode;
+            this.screenController.difficulty = settings.difficulty;
+            this.screenController.mapSelected = settings.mapSelected;
+        });
+        
         // Intervalo para decrementar el tiempo
         // Lógica de actualización de tiempo y vidas
         setInterval(() => {
@@ -79,6 +86,27 @@ export default class GameController {
         return this._timeRemaining;
     }
 
+    sendGameSettings() {
+        if (this.screenController.isHost) {
+            const settings = {
+                gameMode: this.screenController.gameMode,
+                difficulty: this.screenController.difficulty,
+                mapSelected: this.screenController.mapSelected,
+            };
+            console.log('Sending game settings:', settings);
+            this.socket.emit('gameSettingsUpdate', settings);
+        }
+    }
+
+    getGameSettings(settings) {
+        if (!this.screenController.isHost) {
+                this.screenController.gameMode = settings.gameMode,
+                this.gameMode = settings.gameMode,
+                this.screenController.difficulty = settings.difficulty,
+                this.screenController.mapSelected = settings.mapSelected,
+            console.log('Got game settings:', settings);
+        }
+    }
     startspawnrat(){
 		// Verificar la dificultad y generar ratas solo si la dificultad es "Dificil"
         if (this.screenController.difficulty === 1) {

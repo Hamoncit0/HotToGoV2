@@ -107,9 +107,13 @@ socket.on('roomInit', (data) => {
   gameController.timeRemaining = roomState.timeRemaining || 120;
 
   if (isHost) {
+    screenController.isHost = true;
     isHostVar = true; // Bandera para el host
     startHostResponsibilities(roomState);
+    gameController.sendGameSettings();
   }
+  gameController.getGameSettings(roomState.settings);
+  screenController.renderizar()
 
   // Renderizar jugadores existentes
   Object.entries(roomState.players).forEach(([id, player]) => {
@@ -131,6 +135,8 @@ socket.on('roomInit', (data) => {
   // Renderizar objetos si es necesario
   roomState.objects.forEach((object) => gameController.addObjectToScene(object));
 });
+
+
 
 // Manejo de actualizaciones de tiempo desde el servidor
 socket.on('gameUpdate', (data) => {
@@ -236,10 +242,6 @@ function animate(isGameRunning, isGamePaused) {
      if (keyboard['a'] || keyboard['A']) localPlayer.move(-speed, 0, 0);
      if (keyboard['d'] || keyboard['D']) localPlayer.move(speed, 0, 0);
 
-    //  if (!localPlayer.mesh.position.equals(localPlayer.previousPosition)) {
-    //   socket.emit('position', localPlayer.mesh.position, player1Name);
-    //   localPlayer.previousPosition.copy(localPlayer.mesh.position); // Actualizar la posición anterior
-    //  }
 
     scene.children.forEach((object) => {
         if (object.collisionBox && checkCollision(localPlayer, object)) {
