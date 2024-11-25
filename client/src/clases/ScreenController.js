@@ -245,7 +245,10 @@ export class ScreenController {
             this.goToScreen(this.Screens.USERNAME);
         }
         else {
-            this.startGame();
+            if(this.playerModeSelected == 1)
+            this.goToScreen(this.Screens.ROOM)
+            else
+            this.startGame()
         }
     }
     startConnection() {

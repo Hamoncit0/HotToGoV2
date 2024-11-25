@@ -5,19 +5,19 @@ import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 
 const manager = new THREE.LoadingManager();
 manager.onStart = function (url, itemsLoaded, itemsTotal){
-    console.log('Started loading file:' + url + '\nLoaded' + itemsLoaded + ' of ' + itemsTotal + 'files.')
+   // console.log('Started loading file:' + url + '\nLoaded' + itemsLoaded + ' of ' + itemsTotal + 'files.')
 }
 manager.onLoad = function (){
-    console.log('Loading complete!')
+    //console.log('Loading complete!')
 }
 manager.onProgress = function (url, itemsLoaded, itemsTotal){
-    console.log('Loading file:' + url + '\nLoaded' + itemsLoaded + ' of ' + itemsTotal + 'files.')
+    //console.log('Loading file:' + url + '\nLoaded' + itemsLoaded + ' of ' + itemsTotal + 'files.')
 }
 manager.onError = function (url){
-    console.log('There was an error loading ' + url)
+    //console.log('There was an error loading ' + url)
 }
 
-export function loadModel(path, name, scene, rotation = { x: 0, y: 0, z: 0 }, position = {x: 0, y: 0, z: 0}, colision = false) {
+export function loadModel(path, name, scene, rotation = { x: 0, y: 0, z: 0 }, position = {x: 0, y: 0, z: 0}, colision = false, disableReflection = false) {
   const loaderModel = new OBJLoader(manager);
   const mtlModel = new MTLLoader(manager);
 
@@ -31,6 +31,23 @@ export function loadModel(path, name, scene, rotation = { x: 0, y: 0, z: 0 }, po
       object.rotation.y = rotation.y;
       object.rotation.z = rotation.z;
       object.position.set = new THREE.Vector3(position.x, position.y, position.z);
+      // Si `disableReflection` es verdadero, modifica los materiales
+      if (disableReflection) {
+        object.traverse((child) => {
+          if (child.isMesh) {
+            child.material.emissive = new THREE.Color(0x000000); // Sin emisión
+            child.material.flatShading = true; // Sombreado plano para evitar reflejos
+          }
+        });
+      }
+
+      // Configurar sombras
+      object.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = true; // El objeto proyecta sombras
+          child.receiveShadow = true; // El objeto recibe sombras
+        }
+      });
       scene.add(object);
       // Crea y asigna una caja de colisión al modelo
       if(colision)

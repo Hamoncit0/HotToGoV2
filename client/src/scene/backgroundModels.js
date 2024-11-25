@@ -44,7 +44,7 @@ export function beach(scene) {
     loadModel('./src/models/playa_escenario/en_medio_playa', 'en_medio', scene, { x: 0, y: Math.PI/2, z: 0 }, { x: 0, y: 0, z: 0 }, true)
     //loadModel('./src/models/muebles_separados/centro', 'centro', scene, { x: 0, y: Math.PI/2, z: 0 }, { x: 0, y: 0, z: 0 }, true)
 
-    loadModel('./src/models/playa_escenario/escenario', 'escenario', scene, { x: 0, y: Math.PI/2, z: 0 });
+    loadModel('./src/models/playa_escenario/untitled', 'escenario', scene, { x: 0, y: Math.PI/2, z: 0 }, { x: 0, y: 0, z: 0 }, false, true);
     loadModel('./src/models/playa_escenario/carbon', 'carbon', scene, { x: 0, y: Math.PI/2, z: 0 });
     loadModel('./src/models/playa_escenario/cocos', 'cocos', scene, { x: 0, y: Math.PI/2, z: 0 });
 

@@ -97,6 +97,18 @@ let scores = {};
 io.on('connection', (socket) => {
   console.log('Jugador conectado:', socket.id);
 
+  socket.on('loseLife', (roomName) => {
+    const room = rooms[roomName];
+    if (room) {
+      room.lives -= 1;
+      io.to(roomName).emit('livesUpdate', room.lives);
+      console.log('en sala: ' + room.name + 'quedan: ' + room.lives)
+      if (room.lives <= 0) {
+        io.to(roomName).emit('gameOver');
+      }
+    }
+  });
+  
     // Enviar órdenes y puntuación iniciales al jugador
   socket.emit('ordersUpdate', orders);
   socket.emit('scoreUpdate', scores[socket.id] || 0);
@@ -126,6 +138,7 @@ io.on('connection', (socket) => {
         objects: [],
         host: socket.id, // El primer jugador será el host
         timeRemaining: 120,
+        lives: 3, 
         settings: {
           gameMode: gameSettings.gameMode,
           difficulty: gameSettings.difficulty,
@@ -151,6 +164,7 @@ io.on('connection', (socket) => {
     //socket.emit('roomInit', rooms[roomName]);
     socket.emit('roomInit', {
       roomState: rooms[roomName],
+      lives: rooms[roomName].lives,
       isHost: socket.id === rooms[roomName].host // Informar si es el host
     });
 

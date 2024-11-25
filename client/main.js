@@ -30,6 +30,8 @@ camera.lookAt(new THREE.Vector3(0, 2, -5));
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(container.clientWidth, container.clientHeight);
 container.appendChild(renderer.domElement);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 let clock = new THREE.Clock(); // Reloj para medir el tiempo
 
@@ -137,6 +139,15 @@ socket.on('roomInit', (data) => {
 });
 
 
+socket.on('livesUpdate', (lives) => {
+  gameController.lives = lives;
+  gameController.updateLivesUI();
+});
+
+socket.on('gameOver', () => {
+  alert('¡Juego terminado! Se acabaron las vidas.');
+  gameController.endGame(); // Función que detiene el juego.
+});
 
 // Manejo de actualizaciones de tiempo desde el servidor
 socket.on('gameUpdate', (data) => {

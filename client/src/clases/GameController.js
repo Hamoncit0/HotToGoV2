@@ -51,7 +51,6 @@ export default class GameController {
             this.points = updatedPoints;
             this.updateScoreDisplay();
         });
-
         this.socket.on('gameSettingsUpdate', (settings) => {
             console.log('Received game settings:', settings);
             this.screenController.gameMode = settings.gameMode;
@@ -69,13 +68,11 @@ export default class GameController {
                         this.timeRemaining--;
                         this.updateTimeDisplay();
                     } else {
-                        this.screenController.endGame();
                         this.endGame();
                     }
                 } else if (this.screenController.gameMode === 1) {
                     // Fin por vidas
                     if (this.lives <= 0) {
-                        this.screenController.endGame();
                         this.endGame();
                     }
                 }
@@ -143,6 +140,7 @@ export default class GameController {
         console.log(`Juego terminado. Puntuación final: ${this.points}`);
         // Aquí puedes agregar lógica adicional, como mostrar un mensaje en pantalla
         alert(`Fin del juego. Puntuación final: ${this.points}`);
+        this.screenController.endGame();
     }
     
     // Función para generar posiciones aleatorias dentro de un rango
@@ -299,6 +297,8 @@ export default class GameController {
                 this.orders.splice(orderIndex, 1); // Eliminar orden
                 this.points -= 10; // Penalización por no entregar
                 this.lives -=1;
+
+                this.socket.emit('loseLife', this.screenController.room);
                 this.updateLivesUI();
                 this.updateScoreDisplay();
                 this.updateOrdersDisplay();
@@ -312,6 +312,7 @@ export default class GameController {
         }, 1000);
     }
 
+    
     // Verificar entrega
     checkDelivery() {
         if (this.player.heldObject) {
@@ -331,6 +332,7 @@ export default class GameController {
             } else {
                 this.points -= 5;
                 this.lives -= 1;
+                this.socket.emit('loseLife', this.screenController.room);
                 this.updateLivesUI()
                 this.updateScoreDisplay();
                 this.screenController.audioManager.playSound('bonk');
