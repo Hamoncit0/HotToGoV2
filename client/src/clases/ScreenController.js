@@ -85,7 +85,10 @@ export class ScreenController {
         // Cargar efecto de sonido para clics
         this.audioManager.loadSound('click', './src/sounds/ButtonPlate Click (Minecraft Sound) - Sound Effect for editing.mp3');
         this.audioManager.loadSound('ratVisible', './src/sounds/concrete.mp3', 1);
-
+        this.audioManager.loadSound('bonk', './src/sounds/bonk.mp3', 1)
+        this.audioManager.loadSound('bell', './src/sounds/bell.mp3', 1)
+        this.audioManager.loadSound('waisted', './src/sounds/waisted.mp3', 1)
+        
         this.init();
     }
     //Actualizar particulas
@@ -288,6 +291,7 @@ export class ScreenController {
         this.isGamePaused = true;
         this.gameController.isPlaying = false;
         this.clock.stop();
+        this.audioManager.pauseBackgroundMusic();
         this.goToScreen(this.Screens.PAUSE);
     }
 
@@ -295,17 +299,24 @@ export class ScreenController {
         this.isGamePaused = false;
         this.gameController.isPlaying = true;
         this.goToScreen(this.Screens.GAME);
+        this.audioManager.resumeBackgroundMusic();
         this.renderer.setSize(this.Screens.GAME.clientWidth, this.Screens.GAME.clientHeight);
         this.clock.start();
         this.animate();
     }
 
     endGame() {
+        if(this.gameMode == 1){
+            document.getElementById('huh').innerHTML= 'Game Over'
+            this.audioManager.playSound('waisted')
+        }else{
+            document.getElementById('huh').innerHTML = 'Game ended :)';
+        }
         this.isGameRunning = false;
         this.isGamePaused = false;
         this.clock.stop();
         this.goToScreen(this.Screens.GAMEOVER);
-
+        this.audioManager.loadBackgroundMusic('./src/sounds/Spagonia (Day) - Sonic Unleashed [OST].mp3');
          // Obtener el nombre del jugador actual y su puntuación
         const playerName = this.gameController.player.name;
         const playerScore = this.gameController.points; 

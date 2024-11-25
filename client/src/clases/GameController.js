@@ -87,7 +87,7 @@ export default class GameController {
                 if (this.isPlaying) {
                     this.spawnRat();  // Generar una nueva rata cada 2-5 segundos
                 }
-            }, Math.random() * (5000 - 2000) + 2000); // Intervalo aleatorio entre 2-5 segundos
+            }, Math.random() * (15000 - 10000) + 2000); // Intervalo aleatorio entre 2-5 segundos
         }
 	}
 
@@ -270,9 +270,11 @@ export default class GameController {
                 clearInterval(interval);
                 this.orders.splice(orderIndex, 1); // Eliminar orden
                 this.points -= 10; // Penalización por no entregar
+                this.lives -=1;
+                this.updateLivesUI();
                 this.updateScoreDisplay();
                 this.updateOrdersDisplay();
-
+                this.screenController.audioManager.playSound('bonk');
                 // Sincronizar cambios con el servidor
                 this.socket.emit('updateOrders', this.orders);
                 this.socket.emit('updateScore', this.points);
@@ -293,6 +295,7 @@ export default class GameController {
                 this.points += 10;
                 this.updateScoreDisplay();
                 this.updateOrdersDisplay();
+                this.screenController.audioManager.playSound('bell');
 
                  // Emitir actualizaciones al servidor
                 this.socket.emit('updateOrders', this.orders);
@@ -302,8 +305,10 @@ export default class GameController {
                 this.lives -= 1;
                 this.updateLivesUI()
                 this.updateScoreDisplay();
+                this.screenController.audioManager.playSound('bonk');
 
                 // Emitir puntuación actualizada al servidor
+                this.socket.emit('updateOrders', this.orders);
                 this.socket.emit('updateScore', this.points);
             }
             this.player.heldObject.destroy();

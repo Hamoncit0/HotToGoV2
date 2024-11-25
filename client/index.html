@@ -80,10 +80,19 @@
             <button id="go-back-player" class="btn btn-primary play-btn d-flex align-items-center justify-content-center">Go Back</button>
         </div>
     </div>
+    <!-- create or join room -->
+    <div class="canvas" id="room" style="display: none;"  >
+        <div class="player-mode">
+            <h1>Multiplayer...</h1>
+            <button id="create-btn" class="btn btn-primary play-btn d-flex align-items-center justify-content-center">Create Room</button>
+            <button id="join-btn"class="btn btn-primary play-btn d-flex align-items-center justify-content-center">Join Room</button>
+            <button id="go-back-room" class="btn btn-primary play-btn d-flex align-items-center justify-content-center">Go Back</button>
+        </div>
+    </div>
     <!-- game mode -->
     <div class="canvas" id="game-mode" style="display: none;"  >
         <div class="player-mode">
-            <h1>Game Mode</h1>
+            <h1 id="huh"></h1>
             <button id="limitedtime-btn" class="btn btn-primary play-btn d-flex align-items-center justify-content-center">Limited-time</button>
             <button id="bylives-btn"class="btn btn-primary play-btn d-flex align-items-center justify-content-center">By lives</button>
             <button id="go-back-mode" class="btn btn-primary play-btn d-flex align-items-center justify-content-center">Go Back</button>
